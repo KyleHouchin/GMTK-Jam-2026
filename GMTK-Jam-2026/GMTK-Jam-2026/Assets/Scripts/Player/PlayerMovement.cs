@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -10,6 +11,11 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float groundDeceleration = 70f;
     [SerializeField] private float airAcceleration = 35f;
     [SerializeField] private float airDeceleration = 20f;
+
+    [Header("Dash Mechanics")]
+    [SerializeField] private float dashCooldown = 3f;
+    [SerializeField] private float dashDuration = 0.15f;
+    [SerializeField] private float dashFactor = 10;
 
     [Header("Jumping")]
     [SerializeField] private float jumpForce = 12f;
@@ -26,14 +32,17 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private InputActionReference moveAction;
     [SerializeField] private InputActionReference jumpAction;
 
+
     private Rigidbody2D playerRigidbody;
 
     private float horizontalInput;
     private float coyoteTimeCounter;
     private float jumpBufferCounter;
+    private float dashCooldownCounter;
 
     private bool isGrounded;
     private bool jumpReleased;
+    private bool isDashing;
 
     private void Awake()
     {
@@ -76,6 +85,7 @@ public class PlayerMovement : MonoBehaviour
         CheckIfGrounded();
         UpdateCoyoteTime();
         UpdateJumpBuffer();
+        UpdateDashCooldownCounter();
     }
 
     private void FixedUpdate()
@@ -204,6 +214,11 @@ public class PlayerMovement : MonoBehaviour
         jumpReleased = false;
     }
 
+    private void UpdateDashCooldownCounter()
+    {
+        dashCooldownCounter += Time.deltaTime;
+    }
+
     private void OnJumpPerformed(InputAction.CallbackContext context)
     {
         jumpBufferCounter = jumpBufferTime;
@@ -226,5 +241,22 @@ public class PlayerMovement : MonoBehaviour
             groundCheck.position,
             groundCheckRadius
         );
+    }
+
+    public void SetDash()
+    {
+        if(!isDashing && dashCooldownCounter > dashCooldown) {    //Player is not currently dashing
+            isDashing = true;
+            maximumMoveSpeed *= dashFactor;
+            StartCoroutine(DashCounter());
+        }
+    }
+
+    private IEnumerator DashCounter()
+    {
+        yield return new WaitForSeconds(dashDuration); //2 seconds of dashing 
+        isDashing = false;
+        dashCooldownCounter = 0;
+        maximumMoveSpeed /= dashFactor;
     }
 }

@@ -594,6 +594,7 @@ GameObject:
   - component: {fileID: 1202491589}
   - component: {fileID: 1202491588}
   - component: {fileID: 1202491592}
+  - component: {fileID: 1202491593}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -767,6 +768,9 @@ MonoBehaviour:
   groundDeceleration: 60
   airAcceleration: 45
   airDeceleration: 50
+  dashCooldown: 3
+  dashDuration: 0.3
+  dashFactor: 7
   jumpForce: 13
   jumpCutMultiplier: 0.4
   coyoteTime: 0.12
@@ -778,6 +782,18 @@ MonoBehaviour:
     m_Bits: 64
   moveAction: {fileID: 3108043124380445338, guid: 59af296d3ed22094782fbf6bded62677, type: 3}
   jumpAction: {fileID: 6113761538311035157, guid: 59af296d3ed22094782fbf6bded62677, type: 3}
+--- !u!114 &1202491593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202491587}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e4f44972f684f140aa57da19f0c1476, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
