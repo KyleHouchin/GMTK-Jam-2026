@@ -6,7 +6,13 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/WesternLevel.unity
+    path: Assets/Scenes/TitleScreen.unity
+    guid: dac76dfefa08f424bb93069831e694db
+  - enabled: 1
+    path: Assets/Scenes/LevelSelect.unity
+    guid: ab211802c73240a4497919552e81eeec
+  - enabled: 1
+    path: Assets/Scenes/InitialLevel.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
