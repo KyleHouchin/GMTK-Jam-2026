@@ -794,7 +794,9 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6e4f44972f684f140aa57da19f0c1476, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: '::'
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAbility
+  projectilePrefab: {fileID: 8308716528790473782, guid: 6651f23d16b05c244883e2b7d696b51b, type: 3}
+  projectileTimer: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
