@@ -35,6 +35,10 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private InputActionReference moveAction;
     [SerializeField] private InputActionReference jumpAction;
 
+    [Header("Animation")]
+    [SerializeField] private Animator anim;
+    private bool facingRight = true;
+
 
     private Rigidbody2D playerRigidbody;
 
@@ -92,6 +96,7 @@ public class PlayerMovement : MonoBehaviour
         UpdateCoyoteTime();
         UpdateJumpBuffer();
         UpdateDashCooldownCounter();
+        UpdateAnimation();
     }
 
     private void FixedUpdate()
@@ -130,6 +135,24 @@ public class PlayerMovement : MonoBehaviour
         {
             hasAirDash = true;
         }
+    }
+
+    private void UpdateAnimation()
+    {
+        anim.SetFloat("horizontal", Mathf.Abs(playerRigidbody.linearVelocity.x));
+        anim.SetFloat("vertical", playerRigidbody.linearVelocity.y);
+
+        if ( (facingRight && horizontalInput < 0) ||
+             (!facingRight && horizontalInput > 0) )
+        {
+            FlipFacingDirection();
+        }
+    }
+
+    private void FlipFacingDirection()
+    {
+        transform.Rotate(0, 180, 0);
+        facingRight = !facingRight;
     }
 
     private void UpdateCoyoteTime()
