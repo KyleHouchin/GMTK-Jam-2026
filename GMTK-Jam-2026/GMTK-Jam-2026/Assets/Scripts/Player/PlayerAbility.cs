@@ -11,8 +11,9 @@ public class PlayerAbility : MonoBehaviour
     private float projectileTimerCounter;
 
     private bool dashAbilityActive = true;
-    private bool glideAbilityActive = true;
+    private bool glideAbilityActive = false;
     private bool projectileAbilityActive = true;
+    private bool doubleJumpAbilityActive = true;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -37,9 +38,10 @@ public class PlayerAbility : MonoBehaviour
         }
         if(projectileAbilityActive)
         {
-            Console.WriteLine("Ability is active");
             ShootProjectile();
         }
+        //Add logic for a second jump if double jump is active and space is pressed again
+
     }
 
     public void SetDashAbility(bool active)
@@ -56,6 +58,11 @@ public class PlayerAbility : MonoBehaviour
     {
         this.projectileAbilityActive = active;
     }
+    public void SetDoubleJumpAbility(bool active)
+    {
+        this.doubleJumpAbilityActive = active;
+    }
+
     private void ShootProjectile()
     {
         if (projectileTimerCounter < projectileTimer)    //Not enough time since last projectile

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -38,6 +39,18 @@ public class PlayerMovement : MonoBehaviour
     [Header("Animation")]
     [SerializeField] private Animator anim;
     private bool facingRight = true;
+
+    [Header("Wall Mechanics")]
+    [SerializeField] private Transform wallCheck;
+    [SerializeField] private float wallSlidingSpeed = 2f;
+    private bool isWallSliding;
+    [SerializeField] private LayerMask wallLayer;
+    private bool isWallJumping;
+    private float wallJumpingDirection;
+    [SerializeField] private float wallJumpingTime = 0.2f;
+    private float wallJumpingCounter;
+    [SerializeField] private float wallJumpingDuration = 0.4f;
+    [SerializeField] private Vector2 wallJumpingPower = new Vector2(8f, 16f);
 
 
     private Rigidbody2D playerRigidbody;
@@ -97,6 +110,7 @@ public class PlayerMovement : MonoBehaviour
         UpdateJumpBuffer();
         UpdateDashCooldownCounter();
         UpdateAnimation();
+        WallJump();
     }
 
     private void FixedUpdate()
@@ -104,6 +118,7 @@ public class PlayerMovement : MonoBehaviour
         ApplyHorizontalMovement();
         TryToJump();
         ApplyVariableJumpHeight();
+        WallSlide();
     }
 
     private void ReadMovementInput()
@@ -143,7 +158,8 @@ public class PlayerMovement : MonoBehaviour
         anim.SetFloat("vertical", playerRigidbody.linearVelocity.y);
 
         if ( (facingRight && horizontalInput < 0) ||
-             (!facingRight && horizontalInput > 0) )
+             (!facingRight && horizontalInput > 0) 
+             && !isWallJumping)
         {
             FlipFacingDirection();
         }
@@ -177,6 +193,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void ApplyHorizontalMovement()
     {
+        if(isWallJumping)
+        {
+            return;
+        }
         float newHorizontalSpeed = 0;
         if(!isDashing)
         {
@@ -209,9 +229,6 @@ public class PlayerMovement : MonoBehaviour
         {
             newHorizontalSpeed = maximumMoveSpeed * dashFactor * horizontalInput;
         }
-        
-
-        
 
         playerRigidbody.linearVelocity = new Vector2(
             newHorizontalSpeed,
@@ -288,7 +305,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void SetDash()
     {
-        if(!isDashing && dashCooldownCounter > dashCooldown) {    //Player is not currently dashing
+        if(!isDashing && dashCooldownCounter > dashCooldown && !isWallJumping) {    //Player is not currently dashing
             if(!isGrounded)
             {
                 if(!hasAirDash)
@@ -315,7 +332,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void StartGlide()
     {
-        if(!isGrounded)
+        if(!isGrounded && !isWallJumping)
         {
             //Turn off gravity, set vertical velocity to slow set value
             playerRigidbody.gravityScale = 0;
@@ -337,11 +354,66 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator GlideCounter(float prevYVelocity)
     {
-        while(!isGrounded && IsMovingDown() && Keyboard.current.spaceKey.isPressed)
+        while(!isGrounded && IsMovingDown() && Keyboard.current.spaceKey.isPressed && !isWallJumping)
         {
             yield return null;
         }
         playerRigidbody.gravityScale = baseGravityScale;
         playerRigidbody.linearVelocityY = prevYVelocity;        
+    }
+
+    private bool IsWalled()
+    {
+        return Physics2D.OverlapCircle(wallCheck.position, 0.2f, groundLayer);
+    }
+    private void WallSlide()
+    {
+        if(IsWalled() && !IsGrounded() && horizontalInput != 0f)
+        {
+            isWallSliding = true;
+            playerRigidbody.linearVelocity = new Vector2(playerRigidbody.linearVelocityX, Mathf.Clamp(playerRigidbody.linearVelocityY, -wallSlidingSpeed, float.MaxValue));
+        }
+        else
+        {
+            isWallSliding = false;
+        }
+    }
+    private void WallJump()
+    {
+        Debug.Log(wallJumpingCounter > 0f);
+        //This if-else allows for a wall jump to occur for a brief period of time even after the player stops wall sliding
+        if(isWallSliding)
+        {
+            isWallJumping = false;
+            wallJumpingDirection = facingRight ? -1 : 1;
+            wallJumpingCounter = wallJumpingTime;
+
+            CancelInvoke(nameof(StopWallJumping));
+        }
+        else
+        {
+            wallJumpingCounter -= Time.deltaTime;
+        }
+        if(Keyboard.current.spaceKey.wasPressedThisFrame && wallJumpingCounter > 0f)
+        {
+            Debug.Log("Detected a wall jump");
+            isWallJumping = true;
+            playerRigidbody.linearVelocity = new Vector2(wallJumpingDirection * wallJumpingPower.x, wallJumpingPower.y);
+            Debug.Log("Velocity: " + playerRigidbody.linearVelocity);
+            wallJumpingCounter = 0f;
+
+            //Flip direction of player if facing the wrong way
+            if(facingRight && wallJumpingDirection < 0 || !facingRight && wallJumpingDirection > 0)
+            {
+                FlipFacingDirection();
+            }
+            Invoke(nameof(StopWallJumping), wallJumpingDuration);
+        }
+    }
+
+    //This function is important to ensure that the player's movement is restricted for a brief period when wall jumping
+    private void StopWallJumping()
+    {
+        isWallJumping = false;
     }
 }
