@@ -26,9 +26,19 @@ public class TitleMenuController : MonoBehaviour
     private string levelOneSceneName =
         "Level-1";
 
+    private static bool openLevelSelectOnLoad;
+
     private void Awake()
     {
-        ShowMainMenu();
+        if (openLevelSelectOnLoad)
+        {
+            openLevelSelectOnLoad = false;
+            ShowLevelSelect();
+        }
+        else
+        {
+            ShowMainMenu();
+        }
     }
 
     private void OnEnable()
@@ -119,6 +129,11 @@ public class TitleMenuController : MonoBehaviour
                 ShowMainMenu
             );
         }
+    }
+
+    public static void RequestLevelSelectOnLoad()
+    {
+        openLevelSelectOnLoad = true;
     }
 
     public void ShowMainMenu()

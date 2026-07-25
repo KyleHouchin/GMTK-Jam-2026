@@ -35,10 +35,6 @@ public class RunManager : MonoBehaviour
     private string titleSceneName =
         "TitleScreen";
 
-    [SerializeField]
-    private string levelSelectSceneName =
-        "LevelSelect";
-
     [Header("Run State")]
     [SerializeField] private bool runHasStarted;
     [SerializeField] private bool gameIsOver;
@@ -242,8 +238,10 @@ public class RunManager : MonoBehaviour
 
     public void ReturnToLevelSelect()
     {
+        TitleMenuController.RequestLevelSelectOnLoad();
+
         SceneManager.LoadScene(
-            levelSelectSceneName
+            titleSceneName
         );
     }
 
