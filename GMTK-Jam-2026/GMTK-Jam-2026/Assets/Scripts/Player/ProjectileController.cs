@@ -16,4 +16,15 @@ public class ProjectileController : MonoBehaviour
         direction.Normalize();
         rigidbody.linearVelocity = direction * projectileSpeed;
     }
+
+    // destroy the projectile when it hits the ground
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        string ground_tag = "Ground";
+
+        if (collision.gameObject.CompareTag(ground_tag))
+        {
+            Destroy(gameObject);
+        }
+    }
 }

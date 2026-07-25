@@ -9,7 +9,7 @@ public class LevelSelectController : MonoBehaviour
     [SerializeField] private Button backButton;
 
     [Header("Scenes")]
-    [SerializeField] private string initialLevelSceneName = "InitialLevel";
+    [SerializeField] private string initialLevelSceneName = "Level-1";
     [SerializeField] private string titleSceneName = "TitleScreen";
 
     private void OnEnable()
