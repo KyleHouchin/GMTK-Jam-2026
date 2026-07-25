@@ -42,7 +42,7 @@ AudioSource:
   m_GameObject: {fileID: 3973132080627764969}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 5681010818081275844, guid: 183172cb2ba79164284e22b3337fca5c, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
@@ -149,6 +149,6 @@ MonoBehaviour:
   gameOverMusic: {fileID: 8300000, guid: 1565b40fa7948d0478490038b3529e99, type: 3}
   titleSceneName: TitleScreen
   levelSelectSceneName: LevelSelect
-  gameplaySceneName: InitialLevel
+  gameplaySceneName: Level-1
   musicVolume: 0.6
   fadeDuration: 0.5

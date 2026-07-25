@@ -55,8 +55,11 @@ public class PlayerMovement : MonoBehaviour
     private bool isGrounded;
     private bool jumpReleased;
     private bool isDashing;
+    private bool isGliding;
     private bool hasAirDash;
     private bool facingRight = true;
+
+    private Coroutine glideRoutine;
 
     private void Awake()
     {
@@ -104,6 +107,8 @@ public class PlayerMovement : MonoBehaviour
 
             jumpAction.action.Disable();
         }
+
+        EndGlide();
     }
 
     private void Update()
@@ -154,6 +159,11 @@ public class PlayerMovement : MonoBehaviour
         if (isGrounded)
         {
             hasAirDash = true;
+
+            if (isGliding)
+            {
+                EndGlide();
+            }
         }
     }
 
@@ -283,6 +293,8 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
+        EndGlide();
+
         playerRigidbody.linearVelocity =
             new Vector2(
                 playerRigidbody.linearVelocity.x,
@@ -292,6 +304,12 @@ public class PlayerMovement : MonoBehaviour
         coyoteTimeCounter = 0f;
         jumpBufferCounter = 0f;
         jumpReleased = false;
+
+        if (SoundEffectsManager.Instance != null)
+        {
+            SoundEffectsManager.Instance
+                .PlayJumpSound();
+        }
     }
 
     private void ApplyVariableJumpHeight()
@@ -364,7 +382,15 @@ public class PlayerMovement : MonoBehaviour
             hasAirDash = false;
         }
 
+        EndGlide();
+
         isDashing = true;
+
+        if (SoundEffectsManager.Instance != null)
+        {
+            SoundEffectsManager.Instance
+                .PlayDashSound();
+        }
 
         StartCoroutine(
             DashCounter()
@@ -391,21 +417,26 @@ public class PlayerMovement : MonoBehaviour
 
     public void StartGlide()
     {
-        if (isGrounded)
+        if (isGrounded ||
+            isGliding ||
+            !IsMovingDown())
         {
             return;
         }
 
+        isGliding = true;
         playerRigidbody.gravityScale = 0f;
-
-        float previousYVelocity =
-            playerRigidbody.linearVelocityY;
-
         playerRigidbody.linearVelocityY =
             glideVelocity;
 
-        StartCoroutine(
-            GlideCounter(previousYVelocity)
+        if (SoundEffectsManager.Instance != null)
+        {
+            SoundEffectsManager.Instance
+                .StartGlideSound();
+        }
+
+        glideRoutine = StartCoroutine(
+            GlideCounter()
         );
     }
 
@@ -419,23 +450,49 @@ public class PlayerMovement : MonoBehaviour
         return playerRigidbody.linearVelocityY < 0f;
     }
 
-    private IEnumerator GlideCounter(
-        float previousYVelocity)
+    private IEnumerator GlideCounter()
     {
-        while (
-            !isGrounded &&
-            IsMovingDown() &&
-            Keyboard.current != null &&
-            Keyboard.current.spaceKey.isPressed)
+        while (!isGrounded &&
+               IsMovingDown() &&
+               Keyboard.current != null &&
+               Keyboard.current.spaceKey.isPressed)
         {
+            playerRigidbody.linearVelocityY =
+                glideVelocity;
+
             yield return null;
         }
 
-        playerRigidbody.gravityScale =
-            baseGravityScale;
+        glideRoutine = null;
+        EndGlide();
+    }
 
-        playerRigidbody.linearVelocityY =
-            previousYVelocity;
+    private void EndGlide()
+    {
+        if (glideRoutine != null)
+        {
+            StopCoroutine(glideRoutine);
+            glideRoutine = null;
+        }
+
+        if (!isGliding)
+        {
+            return;
+        }
+
+        isGliding = false;
+
+        if (playerRigidbody != null)
+        {
+            playerRigidbody.gravityScale =
+                baseGravityScale;
+        }
+
+        if (SoundEffectsManager.Instance != null)
+        {
+            SoundEffectsManager.Instance
+                .StopGlideSound();
+        }
     }
 
     private void OnDrawGizmosSelected()

@@ -7,24 +7,24 @@ public class PlayerLoadout : MonoBehaviour
 
     [Header("Selected Abilities")]
     [SerializeField] private bool hasBatRush;
-    [SerializeField] private bool hasWingedLeap;
+    [SerializeField] private bool hasGlide;
     [SerializeField] private bool hasBloodShot;
 
     public int StartingLifeForce => startingLifeForce;
     public bool HasBatRush => hasBatRush;
-    public bool HasWingedLeap => hasWingedLeap;
+    public bool HasGlide => hasGlide;
     public bool HasBloodShot => hasBloodShot;
 
     public void ConfigureLoadout(
         int lifeForce,
         bool batRushSelected,
-        bool wingedLeapSelected,
+        bool glideSelected,
         bool bloodShotSelected)
     {
         startingLifeForce = Mathf.Max(0, lifeForce);
 
         hasBatRush = batRushSelected;
-        hasWingedLeap = wingedLeapSelected;
+        hasGlide = glideSelected;
         hasBloodShot = bloodShotSelected;
     }
 
@@ -33,7 +33,7 @@ public class PlayerLoadout : MonoBehaviour
         startingLifeForce = 0;
 
         hasBatRush = false;
-        hasWingedLeap = false;
+        hasGlide = false;
         hasBloodShot = false;
     }
 }

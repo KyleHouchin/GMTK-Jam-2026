@@ -1,90 +1,147 @@
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(PlayerMovement))]
+[RequireComponent(typeof(PlayerLoadout))]
 public class PlayerAbility : MonoBehaviour
 {
     [SerializeField] private GameObject projectilePrefab;
+
     private PlayerMovement playerMovement;
+    private PlayerLoadout playerLoadout;
 
     [SerializeField] private float projectileTimer = 1f;    //1 second between projectiles
     private float projectileTimerCounter;
-
-    private bool dashAbilityActive = true;
-    private bool glideAbilityActive = true;
-    private bool projectileAbilityActive = true;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         playerMovement = GetComponent<PlayerMovement>();
+        playerLoadout = GetComponent<PlayerLoadout>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (Keyboard.current == null)
+        {
+            return;
+        }
+
         projectileTimerCounter += Time.deltaTime;
-        if (Keyboard.current.leftShiftKey.wasPressedThisFrame && dashAbilityActive)
+
+        if (Keyboard.current.leftShiftKey.wasPressedThisFrame &&
+            CanUseDash())
         {
             playerMovement.SetDash();
         }
 
-        if(Keyboard.current.spaceKey.isPressed && 
-            !playerMovement.IsGrounded() && glideAbilityActive 
-            && playerMovement.IsMovingDown())
+        if (Keyboard.current.spaceKey.isPressed &&
+            !playerMovement.IsGrounded() &&
+            CanUseGlide() &&
+            playerMovement.IsMovingDown())
         {
             playerMovement.StartGlide();
         }
-        if(projectileAbilityActive)
+
+        if (CanUseProjectile())
         {
-            Console.WriteLine("Ability is active");
             ShootProjectile();
         }
     }
 
-    public void SetDashAbility(bool active)
+    private bool CanUseDash()
     {
-        this.dashAbilityActive = active; 
+        if (playerLoadout == null)
+        {
+            return false;
+        }
+
+        return playerLoadout.HasBatRush;
     }
 
-    public void SetGlideAbility(bool active)
+    private bool CanUseGlide()
     {
-        this.glideAbilityActive = active;
+        if (playerLoadout == null)
+        {
+            return false;
+        }
+
+        return playerLoadout.HasGlide;
     }
 
-    public void SetProjectileAbility(bool active)
+    private bool CanUseProjectile()
     {
-        this.projectileAbilityActive = active;
+        if (playerLoadout == null)
+        {
+            return false;
+        }
+
+        return playerLoadout.HasBloodShot;
     }
+
     private void ShootProjectile()
     {
         if (projectileTimerCounter < projectileTimer)    //Not enough time since last projectile
         {
             return;
         }
+
+        if (projectilePrefab == null)
+        {
+            Debug.LogWarning(
+                $"{name} does not have a projectile prefab assigned.",
+                this
+            );
+
+            return;
+        }
+
         if (Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
-            ProjectileController projectile = GameObject.Instantiate(projectilePrefab, transform.position, Quaternion.identity).GetComponent<ProjectileController>();
-            projectile.setVelocityDirection(Vector2.up);
-            projectileTimerCounter = 0;
+            CreateProjectile(Vector2.up);
         }
         else if (Keyboard.current.downArrowKey.wasPressedThisFrame)
         {
-            ProjectileController projectile = GameObject.Instantiate(projectilePrefab, transform.position, Quaternion.identity).GetComponent<ProjectileController>();
-            projectile.setVelocityDirection(Vector2.down);
-            projectileTimerCounter = 0;
+            CreateProjectile(Vector2.down);
         }
         else if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
         {
-            ProjectileController projectile = GameObject.Instantiate(projectilePrefab, transform.position, Quaternion.identity).GetComponent<ProjectileController>();
-            projectile.setVelocityDirection(Vector2.left);
-            projectileTimerCounter = 0;
+            CreateProjectile(Vector2.left);
         }
         else if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
         {
-            ProjectileController projectile = GameObject.Instantiate(projectilePrefab, transform.position, Quaternion.identity).GetComponent<ProjectileController>();
-            projectile.setVelocityDirection(Vector2.right);
-            projectileTimerCounter = 0;
+            CreateProjectile(Vector2.right);
+        }
+    }
+
+    private void CreateProjectile(
+        Vector2 direction)
+    {
+        ProjectileController projectile =
+            Instantiate(
+                projectilePrefab,
+                transform.position,
+                Quaternion.identity
+            ).GetComponent<ProjectileController>();
+
+        if (projectile == null)
+        {
+            Debug.LogWarning(
+                "The projectile prefab does not contain a ProjectileController.",
+                projectilePrefab
+            );
+
+            return;
+        }
+
+        projectile.setVelocityDirection(direction);
+        projectileTimerCounter = 0f;
+
+        if (SoundEffectsManager.Instance != null)
+        {
+            SoundEffectsManager.Instance
+                .PlayProjectileSound();
         }
     }
 }

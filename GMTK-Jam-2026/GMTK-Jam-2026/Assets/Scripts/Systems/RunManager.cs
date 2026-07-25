@@ -213,9 +213,16 @@ public class RunManager : MonoBehaviour
                 $"{lifeForceTimer.CurrentLifeForce:0.0}";
         }
 
+        if (SoundEffectsManager.Instance != null)
+        {
+            SoundEffectsManager.Instance
+                .PlayVictorySound();
+        }
+
         if (MusicManager.Instance != null)
         {
-            MusicManager.Instance.PlayVictoryMusic();
+            MusicManager.Instance
+                .PlayVictoryMusic();
         }
     }
 
@@ -228,7 +235,9 @@ public class RunManager : MonoBehaviour
 
     public void ReturnToTitle()
     {
-        SceneManager.LoadScene(titleSceneName);
+        SceneManager.LoadScene(
+            titleSceneName
+        );
     }
 
     public void ReturnToLevelSelect()
@@ -265,11 +274,13 @@ public class RunManager : MonoBehaviour
     private void SaveSelectedLoadout()
     {
         bool batRushSelected =
-            altarManager.IsAbilitySelected("Dash");
-
-        bool wingedLeapSelected =
             altarManager.IsAbilitySelected(
-                "DoubleJump"
+                "Dash"
+            );
+
+        bool glideSelected =
+            altarManager.IsAbilitySelected(
+                "Glide"
             );
 
         bool bloodShotSelected =
@@ -280,7 +291,7 @@ public class RunManager : MonoBehaviour
         playerLoadout.ConfigureLoadout(
             altarManager.RemainingLifeForce,
             batRushSelected,
-            wingedLeapSelected,
+            glideSelected,
             bloodShotSelected
         );
     }
@@ -310,9 +321,16 @@ public class RunManager : MonoBehaviour
         SetPanelActive(victoryPanel, false);
         SetPanelActive(gameOverPanel, true);
 
+        if (SoundEffectsManager.Instance != null)
+        {
+            SoundEffectsManager.Instance
+                .PlayGameOverSound();
+        }
+
         if (MusicManager.Instance != null)
         {
-            MusicManager.Instance.PlayGameOverMusic();
+            MusicManager.Instance
+                .PlayGameOverMusic();
         }
     }
 
