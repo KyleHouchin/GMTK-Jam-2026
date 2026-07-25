@@ -20,6 +20,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Glide Mechanics")]
     [SerializeField] private float glideVelocity = -1.5f;
     [SerializeField, Min(0.01f)] private float glideGroundStopDistance = 0.5f;
+    private float maxRaycastLength = 50f;
 
     [Header("Jumping")]
     [SerializeField] private float jumpForce = 12f;
@@ -55,7 +56,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float timeBeforeSlipping = 0.5f;
     private float timeBeforeSlippingCounter;
     private bool isWallSliding;
+    public bool IsWallSliding => isWallSliding;
     private bool isWallJumping;
+    public bool IsWallJumping => isWallJumping;
     [SerializeField] private Vector2 wallJumpMagnitude = new Vector2(8, 16);
     private float wallJumpDirection;
     [SerializeField] private float wallJumpTime = 0.2f;
@@ -258,19 +261,19 @@ public class PlayerMovement : MonoBehaviour
         }
 
         RaycastHit2D groundHit = Physics2D.Raycast(
-            groundCheck.position,
+            transform.position,
             Vector2.down,
-            glideGroundStopDistance,
+            maxRaycastLength,
             groundLayer
         );
 
         if (groundHit.collider != null)
         {
             distanceToGround = groundHit.distance;
-            isTooCloseToGroundToGlide = true;
+            isTooCloseToGroundToGlide = (distanceToGround < glideGroundStopDistance);
 
             Debug.DrawLine(
-                groundCheck.position,
+                transform.position,
                 groundHit.point,
                 Color.green
             );
@@ -279,12 +282,6 @@ public class PlayerMovement : MonoBehaviour
         {
             distanceToGround = -1f;
             isTooCloseToGroundToGlide = false;
-
-            Debug.DrawLine(
-                groundCheck.position,
-                groundCheck.position + Vector3.down * glideGroundStopDistance,
-                Color.red
-            );
         }
     }
 
@@ -692,7 +689,6 @@ public class PlayerMovement : MonoBehaviour
          */
         while (!isGrounded &&
                !isTooCloseToGroundToGlide &&
-               IsMovingDown() &&
                Keyboard.current != null &&
                Keyboard.current.spaceKey.isPressed)
         {
@@ -808,7 +804,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void WallSlide()
     {
-        if (IsWalled() && !IsGrounded() && IsMovingDown() && ((facingRight && horizontalInput > 0.01f) || (!facingRight && horizontalInput < -0.01f)))
+        if (IsWalled() && !IsGrounded() && IsMovingDown() && ((facingRight && horizontalInput > 0.01f) || (!facingRight && horizontalInput < -0.01f)) && !isGliding)
         {
             timeBeforeSlippingCounter += Time.deltaTime;
             isWallSliding = true;

@@ -85,7 +85,7 @@ public class PlayerAbility : MonoBehaviour
         if (Keyboard.current.spaceKey.isPressed &&
             !playerMovement.IsGrounded() &&
             CanUseGlide() &&
-            playerMovement.IsMovingDown())
+            playerMovement.IsMovingDown() && !playerMovement.IsTooCloseToGroundToGlide && !playerMovement.IsWallSliding && !playerMovement.IsWallJumping)
         {
             playerMovement.StartGlide();
         }
