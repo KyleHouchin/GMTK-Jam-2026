@@ -145,6 +145,8 @@ MonoBehaviour:
   titleMusic: {fileID: 8300000, guid: bd66b62da426e50428e0eb4518e688d2, type: 3}
   levelSelectMusic: {fileID: 8300000, guid: bd66b62da426e50428e0eb4518e688d2, type: 3}
   gameplayMusic: {fileID: 8300000, guid: 0a229402d03f1394a8f2da35182e892f, type: 3}
+  victoryMusic: {fileID: 8300000, guid: f5bfbce54fa3cef40b05cd8c9f430a8a, type: 3}
+  gameOverMusic: {fileID: 8300000, guid: 1565b40fa7948d0478490038b3529e99, type: 3}
   titleSceneName: TitleScreen
   levelSelectSceneName: LevelSelect
   gameplaySceneName: InitialLevel
