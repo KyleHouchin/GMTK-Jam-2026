@@ -1916,11 +1916,11 @@ MonoBehaviour:
   externalSpeedMultiplier: 1
   wallLayer:
     serializedVersion: 2
-    m_Bits: 64
-  wallCheck: {fileID: 166951757}
+    m_Bits: 0
+  wallCheck: {fileID: 0}
   wallSlidingSpeed: 2
   timeBeforeSlipping: 0.5
-  wallJumpMagnitude: {x: 12, y: 12.2}
+  wallJumpMagnitude: {x: 8, y: 16}
   wallJumpTime: 0.2
   wallSlidingBuffer: 0.12
 --- !u!50 &685316655
