@@ -19,7 +19,7 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Glide Mechanics")]
     [SerializeField] private float glideVelocity = -1.5f;
-    [SerializeField, Min(0.01f)] private float glideGroundStopDistance = 0.4f;
+    [SerializeField, Min(0.01f)] private float glideGroundStopDistance = 0.5f;
 
     [Header("Jumping")]
     [SerializeField] private float jumpForce = 12f;
@@ -61,9 +61,6 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float wallJumpTime = 0.2f;
     private float wallSlidingBufferCounter;
     [SerializeField] private float wallSlidingBuffer = 0.12f;
-
-    public float ExternalSpeedMultiplier =>
-        externalSpeedMultiplier;
 
     private Rigidbody2D playerRigidbody;
 
@@ -300,20 +297,11 @@ public class PlayerMovement : MonoBehaviour
         }
         if (anim != null)
         {
-            anim.SetFloat(
-                "horizontal",
-                Mathf.Abs(playerRigidbody.linearVelocity.x)
-            );
+            anim.SetFloat("horizontal", Mathf.Abs(playerRigidbody.linearVelocity.x));
 
-            anim.SetFloat(
-                "vertical",
-                playerRigidbody.linearVelocity.y
-            );
+            anim.SetFloat("vertical", playerRigidbody.linearVelocity.y);
 
-            anim.SetBool(
-                "isGliding",
-                isGliding
-            );
+            anim.SetBool("isGliding", isGliding);
 
             // Transform from bat back into a vampire.
             // The same transformation animation is played backward.
@@ -522,103 +510,57 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        /*
-         * The player receives one Dash while airborne.
-         *
-         * Landing sets hasAirDash back to true inside
-         * CheckIfGrounded().
-         */
+        // player is in air
         if (!isGrounded)
         {
+            // no air dash available, don't dash
             if (!hasAirDash)
             {
                 return;
             }
-
+            // use up air dash
             hasAirDash = false;
         }
 
-        /*
-         * Dashing interrupts Glide.
-         *
-         * EndGlide() stops the Glide coroutine,
-         * restores normal gravity, and stops its sound.
-         */
-        EndGlide();
+        // begin player dash!!!!!
+        isDashing = true;
+        EndGlide(); // interrupt glide
 
-        /*
-         * Save the direction when Dash begins.
-         *
-         * We do not use the live horizontal input during Dash,
-         * because changing input midway through the Dash should
-         * not reverse or cancel it.
-         */
-        if (Mathf.Abs(horizontalInput) > 0.01f)
+        if (Mathf.Abs(horizontalInput) > 0.01f) // set dash direction of horizontal input
         {
             dashDirection = Mathf.Sign(horizontalInput);
         }
-        else if (facingRight)
+        else // no player input, dash direction player is facing
         {
-            dashDirection = 1f;
+            dashDirection = facingRight ? 1f : -1f;
         }
-        else
-        {
-            dashDirection = -1f;
-        }
-
-        isDashing = true;
 
         if (SoundEffectsManager.Instance != null)
         {
             SoundEffectsManager.Instance.PlayDashSound();
         }
 
-        /*
-         * This should normally be null because the conditions
-         * above prevent starting another Dash while one is active.
-         *
-         * This safety check stops an older Dash coroutine if one
-         * somehow still exists.
-         */
+        // stop any already running dash coroutines (only one at a time)
         if (dashRoutine != null)
         {
             StopCoroutine(dashRoutine);
         }
 
-        /*
-         * StartCoroutine begins DashCounter().
-         *
-         * DashCounter does not complete immediately. It pauses
-         * for dashDuration, then finishes the Dash.
-         *
-         * We save the returned Coroutine reference so it can be
-         * stopped early if PlayerMovement becomes disabled.
-         */
         dashRoutine = StartCoroutine(DashCounter());
     }
 
     private IEnumerator DashCounter()
     {
-        /*
-         * WaitForSeconds pauses this coroutine without freezing
-         * the entire game.
-         *
-         * Other Update and FixedUpdate methods continue running.
-         * During this wait, isDashing remains true, so
-         * ApplyHorizontalMovement continues applying Dash speed.
-         */
+        // pause just this method (coroutine)
         yield return new WaitForSeconds(dashDuration);
 
-        /*
-         * Reaching this line means the wait completed normally.
-         *
-         * Clear the reference first so EndDash() knows there is
-         * no longer a running coroutine that needs to be stopped.
-         */
+        // Reaching this line means the wait completed normally.
         dashRoutine = null;
 
         // Finish the Dash and return to normal movement.
         EndDash();
+
+        // coroutine ends, do not need to call stop coroutine
     }
 
     private void EndDash()
@@ -650,12 +592,7 @@ public class PlayerMovement : MonoBehaviour
 
         isDashing = false;
 
-        /*
-         * Reset the cooldown timer.
-         *
-         * UpdateDashCooldownCounter() will begin increasing it
-         * again now that isDashing is false.
-         */
+        // reset cooldown timer
         dashCooldownCounter = 0f;
 
         if (playerRigidbody != null)

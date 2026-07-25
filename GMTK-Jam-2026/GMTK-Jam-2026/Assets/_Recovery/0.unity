@@ -537,63 +537,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 78936921}
   m_CullTransparentMesh: 1
---- !u!1001 &191151176
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 3973132080627764969, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
-      propertyPath: m_Name
-      value: MusicManager
-      objectReference: {fileID: 0}
-    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -1.05
-      objectReference: {fileID: 0}
-    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
 --- !u!1 &230658153
 GameObject:
   m_ObjectHideFlags: 0
@@ -655,7 +598,6 @@ MonoBehaviour:
   playerAbility: {fileID: 0}
   playerLoadout: {fileID: 685316661}
   playerRigidbody: {fileID: 685316655}
-  currentLevelNumber: 1
   titleSceneName: TitleScreen
   runHasStarted: 0
   gameIsOver: 0
@@ -1722,7 +1664,6 @@ GameObject:
   - component: {fileID: 685316659}
   - component: {fileID: 685316660}
   - component: {fileID: 685316661}
-  - component: {fileID: 685316662}
   m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
@@ -1744,8 +1685,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   projectilePrefab: {fileID: 8308716528790473782, guid: 6651f23d16b05c244883e2b7d696b51b, type: 3}
   projectileSpawnDistance: 0.75
-  projectileTimer: 0.5
-  diagonalInputWindow: 0.04
+  projectileTimer: 1
+  diagonalInputWindow: 0.12
 --- !u!114 &685316654
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1767,7 +1708,6 @@ MonoBehaviour:
   dashDuration: 0.3
   dashFactor: 7
   glideVelocity: -1.5
-  glideGroundStopDistance: 0.5
   jumpForce: 14
   jumpCutMultiplier: 0.4
   coyoteTime: 0.12
@@ -1959,27 +1899,6 @@ MonoBehaviour:
   hasBatRush: 0
   hasGlide: 0
   hasBloodShot: 0
---- !u!114 &685316662
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 685316652}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a9e50b35965c304f9fea8d4d42541eb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerDamageReceiver
-  lifeForceTimer: {fileID: 230658154}
-  runManager: {fileID: 230658155}
-  playerMovement: {fileID: 685316654}
-  invincibilityDuration: 1
-  stunDuration: 0.2
-  horizontalKnockback: 8
-  verticalKnockback: 5
-  isInvincible: 0
-  isStunned: 0
 --- !u!1 &710712173
 GameObject:
   m_ObjectHideFlags: 0
@@ -3382,63 +3301,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 992973899}
   m_CullTransparentMesh: 1
---- !u!1001 &1075462346
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -1.05
-      objectReference: {fileID: 0}
-    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5370477283959102805, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
-      propertyPath: m_Name
-      value: SoundEffectsManager
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
 --- !u!1 &1078919382
 GameObject:
   m_ObjectHideFlags: 0
@@ -3590,7 +3452,6 @@ GameObject:
   - component: {fileID: 1337588240}
   - component: {fileID: 1337588239}
   - component: {fileID: 1337588238}
-  - component: {fileID: 1337588241}
   m_Layer: 6
   m_Name: Spikes
   m_TagString: Untagged
@@ -5728,7 +5589,7 @@ TilemapCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_CompositeOperation: 1
   m_CompositeOrder: 0
@@ -5736,20 +5597,6 @@ TilemapCollider2D:
   m_MaximumTileChangeCount: 1000
   m_ExtrusionFactor: 0
   m_UseDelaunayMesh: 0
---- !u!114 &1337588241
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1337588234}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f280503da940db4a81c2733aebabeb4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DamageHazard
-  lifeForceDamage: 5
-  logSuccessfulHits: 0
 --- !u!1 &1483841550
 GameObject:
   m_ObjectHideFlags: 0
@@ -7747,7 +7594,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5923464ee95faa947b7ef292c493c38d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LifeForceAltarManager
-  maximumLifeForce: 100
+  maximumLifeForce: 20
   maximumLifeForceText: {fileID: 235301954}
   remainingLifeForceText: {fileID: 1078919383}
   abilityOptions:
@@ -31624,5 +31471,3 @@ SceneRoots:
   - {fileID: 230658156}
   - {fileID: 685316658}
   - {fileID: 403280082}
-  - {fileID: 191151176}
-  - {fileID: 1075462346}
