@@ -26,6 +26,12 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private InputActionReference moveAction;
     [SerializeField] private InputActionReference jumpAction;
 
+    [Header("Runtime Speed Modifier")]
+    [SerializeField] private float externalSpeedMultiplier = 1f;
+
+    public float ExternalSpeedMultiplier =>
+        externalSpeedMultiplier;
+
     private Rigidbody2D playerRigidbody;
 
     private float horizontalInput;
@@ -38,6 +44,7 @@ public class PlayerMovement : MonoBehaviour
     private void Awake()
     {
         playerRigidbody = GetComponent<Rigidbody2D>();
+        ResetExternalSpeedMultiplier();
     }
 
     private void OnEnable()
@@ -93,7 +100,9 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        Vector2 moveInput = moveAction.action.ReadValue<Vector2>();
+        Vector2 moveInput =
+            moveAction.action.ReadValue<Vector2>();
+
         horizontalInput = moveInput.x;
     }
 
@@ -134,10 +143,16 @@ public class PlayerMovement : MonoBehaviour
 
     private void ApplyHorizontalMovement()
     {
-        float targetSpeed = horizontalInput * maximumMoveSpeed;
-        float currentSpeed = playerRigidbody.linearVelocity.x;
+        float targetSpeed =
+            horizontalInput *
+            maximumMoveSpeed *
+            externalSpeedMultiplier;
 
-        bool playerIsTryingToMove = Mathf.Abs(horizontalInput) > 0.01f;
+        float currentSpeed =
+            playerRigidbody.linearVelocity.x;
+
+        bool playerIsTryingToMove =
+            Mathf.Abs(horizontalInput) > 0.01f;
 
         float speedChangeRate;
 
@@ -168,8 +183,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void TryToJump()
     {
-        bool canUseCoyoteTime = coyoteTimeCounter > 0f;
-        bool hasBufferedJump = jumpBufferCounter > 0f;
+        bool canUseCoyoteTime =
+            coyoteTimeCounter > 0f;
+
+        bool hasBufferedJump =
+            jumpBufferCounter > 0f;
 
         if (!canUseCoyoteTime || !hasBufferedJump)
         {
@@ -197,22 +215,39 @@ public class PlayerMovement : MonoBehaviour
         {
             playerRigidbody.linearVelocity = new Vector2(
                 playerRigidbody.linearVelocity.x,
-                playerRigidbody.linearVelocity.y * jumpCutMultiplier
+                playerRigidbody.linearVelocity.y *
+                jumpCutMultiplier
             );
         }
 
         jumpReleased = false;
     }
 
-    private void OnJumpPerformed(InputAction.CallbackContext context)
+    private void OnJumpPerformed(
+        InputAction.CallbackContext context)
     {
         jumpBufferCounter = jumpBufferTime;
         jumpReleased = false;
     }
 
-    private void OnJumpCanceled(InputAction.CallbackContext context)
+    private void OnJumpCanceled(
+        InputAction.CallbackContext context)
     {
         jumpReleased = true;
+    }
+
+    public void SetExternalSpeedMultiplier(
+        float multiplier)
+    {
+        externalSpeedMultiplier = Mathf.Max(
+            0f,
+            multiplier
+        );
+    }
+
+    public void ResetExternalSpeedMultiplier()
+    {
+        externalSpeedMultiplier = 1f;
     }
 
     private void OnDrawGizmosSelected()
