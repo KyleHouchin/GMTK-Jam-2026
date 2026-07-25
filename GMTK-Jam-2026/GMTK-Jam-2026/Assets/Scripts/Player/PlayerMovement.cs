@@ -19,6 +19,10 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Glide Mechanics")]
     [SerializeField] private float glideVelocity = -1.5f;
+    private bool wasGlidingLastFrame = false;
+    private bool isGliding = false;
+    bool isTooCloseToGroundToGlide = false; // transform back to vampire if too close to ground
+
 
     [Header("Jumping")]
     [SerializeField] private float jumpForce = 12f;
@@ -30,6 +34,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundLayer;
+    private float maxGroundDistanceRayCast = 50.0f;
+    private float distanceToGround;
 
     [Header("Input")]
     [SerializeField] private InputActionReference moveAction;
@@ -96,6 +102,7 @@ public class PlayerMovement : MonoBehaviour
         UpdateCoyoteTime();
         UpdateJumpBuffer();
         UpdateDashCooldownCounter();
+        UpdateGroundDistance();
         UpdateAnimation();
     }
 
@@ -137,16 +144,56 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private void UpdateGroundDistance()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, maxGroundDistanceRayCast, groundLayer);
+
+        if (hit != null)
+        {
+            // hit!
+            distanceToGround = hit.distance;
+            Debug.DrawLine(transform.position, hit.point, Color.green);
+        }
+        else
+        {
+            // no hit
+            distanceToGround = -1;
+            Debug.Log("No Ground detected under player");
+        }
+
+        isTooCloseToGroundToGlide = (distanceToGround > 0 && distanceToGround < 1.0f);
+    }
+
     private void UpdateAnimation()
     {
         anim.SetFloat("horizontal", Mathf.Abs(playerRigidbody.linearVelocity.x));
         anim.SetFloat("vertical", playerRigidbody.linearVelocity.y);
+        anim.SetBool("isGliding", isGliding);
 
         if ( (facingRight && horizontalInput < 0) ||
              (!facingRight && horizontalInput > 0) )
         {
             FlipFacingDirection();
         }
+
+        // transform from bat to vampire (play vampire_to_bat in reverse)
+        bool isBecomingVampire = !isGliding && wasGlidingLastFrame;
+        // transform from vampire to bat (play vampire_to_bat forward)
+        bool isBecomingBat = isGliding && !wasGlidingLastFrame;
+        if (isBecomingBat)
+        {
+            anim.SetFloat("transform_anim_speed", 1.0f); // play forward
+
+            anim.Play("vampire_to_bat", 0, 0.0f); // start from beginning
+        }
+        else if (isBecomingVampire)
+        {
+            anim.SetFloat("transform_anim_speed", -1.0f); // play in reverse
+
+            anim.Play("vampire_to_bat", 0, 1.0f); // start from end
+        }
+
+        wasGlidingLastFrame = isGliding;
     }
 
     private void FlipFacingDirection()
@@ -315,13 +362,14 @@ public class PlayerMovement : MonoBehaviour
 
     public void StartGlide()
     {
-        if(!isGrounded)
+        if(!isGrounded && !isTooCloseToGroundToGlide)
         {
             //Turn off gravity, set vertical velocity to slow set value
             playerRigidbody.gravityScale = 0;
             float prevYVelocity = playerRigidbody.linearVelocityY;
             playerRigidbody.linearVelocityY = glideVelocity;
             StartCoroutine(GlideCounter(prevYVelocity));
+            isGliding = true;
         }
     }
 
@@ -339,9 +387,13 @@ public class PlayerMovement : MonoBehaviour
     {
         while(!isGrounded && IsMovingDown() && Keyboard.current.spaceKey.isPressed)
         {
+            if (isTooCloseToGroundToGlide) 
+                break;
+
             yield return null;
         }
         playerRigidbody.gravityScale = baseGravityScale;
-        playerRigidbody.linearVelocityY = prevYVelocity;        
+        playerRigidbody.linearVelocityY = prevYVelocity;
+        isGliding = false;
     }
 }
