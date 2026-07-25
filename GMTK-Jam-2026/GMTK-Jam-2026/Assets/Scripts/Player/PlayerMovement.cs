@@ -19,7 +19,7 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Glide Mechanics")]
     [SerializeField] private float glideVelocity = -1.5f;
-    [SerializeField, Min(0.01f)] private float glideGroundStopDistance = 0.5f;
+    [SerializeField, Min(0.01f)] private float glideGroundStopDistance = 1f;
     private float maxRaycastLength = 50f;
 
     [Header("Jumping")]

@@ -7672,6 +7672,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 919640897812088413, guid: 3ec301e70bc3fcf48a81c12b5278167c, type: 3}
+      propertyPath: glideGroundStopDistance
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3152452900138573917, guid: 3ec301e70bc3fcf48a81c12b5278167c, type: 3}
       propertyPath: runManager
       value: 
