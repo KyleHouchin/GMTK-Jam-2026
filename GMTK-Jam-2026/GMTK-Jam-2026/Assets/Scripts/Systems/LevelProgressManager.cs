@@ -1,26 +1,21 @@
-using UnityEngine;
-
 public static class LevelProgressManager
 {
-    private const string HighestUnlockedLevelKey =
-        "HighestUnlockedLevel";
-
     private const int FirstLevelNumber = 1;
     private const int FinalLevelNumber = 3;
 
+    private static int highestUnlockedLevel =
+        FirstLevelNumber;
+
     public static int GetHighestUnlockedLevel()
     {
-        return PlayerPrefs.GetInt(
-            HighestUnlockedLevelKey,
-            FirstLevelNumber
-        );
+        return highestUnlockedLevel;
     }
 
     public static bool IsLevelUnlocked(
         int levelNumber)
     {
         return levelNumber <=
-               GetHighestUnlockedLevel();
+               highestUnlockedLevel;
     }
 
     public static void CompleteLevel(
@@ -36,30 +31,19 @@ public static class LevelProgressManager
                 FinalLevelNumber;
         }
 
-        int currentHighestUnlockedLevel =
-            GetHighestUnlockedLevel();
-
         if (nextLevelNumber <=
-            currentHighestUnlockedLevel)
+            highestUnlockedLevel)
         {
             return;
         }
 
-        PlayerPrefs.SetInt(
-            HighestUnlockedLevelKey,
-            nextLevelNumber
-        );
-
-        PlayerPrefs.Save();
+        highestUnlockedLevel =
+            nextLevelNumber;
     }
 
     public static void ResetProgress()
     {
-        PlayerPrefs.SetInt(
-            HighestUnlockedLevelKey,
-            FirstLevelNumber
-        );
-
-        PlayerPrefs.Save();
+        highestUnlockedLevel =
+            FirstLevelNumber;
     }
 }

@@ -9,26 +9,47 @@ public class DamageHazard : MonoBehaviour
     [Header("Debugging")]
     [SerializeField] private bool logSuccessfulHits;
 
-    private void Reset()
-    {
-        Collider2D hazardCollider =
-            GetComponent<Collider2D>();
+    private Collider2D hazardCollider;
 
-        if (hazardCollider != null)
-        {
-            hazardCollider.isTrigger = true;
-        }
+    private void Awake()
+    {
+        hazardCollider = GetComponent<Collider2D>();
     }
 
     private void OnValidate()
     {
-        lifeForceDamage = Mathf.Max(
-            0f,
-            lifeForceDamage
-        );
+        lifeForceDamage = Mathf.Max(0f, lifeForceDamage);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
+    {
+        TryDamagePlayer(
+            other,
+            other.transform.position
+        );
+    }
+
+    private void OnCollisionEnter2D(
+        Collision2D collision)
+    {
+        Vector2 damageSourcePosition =
+            collision.transform.position;
+
+        if (collision.contactCount > 0)
+        {
+            damageSourcePosition =
+                collision.GetContact(0).point;
+        }
+
+        TryDamagePlayer(
+            collision.collider,
+            damageSourcePosition
+        );
+    }
+
+    private void TryDamagePlayer(
+        Collider2D other,
+        Vector2 damageSourcePosition)
     {
         PlayerDamageReceiver damageReceiver =
             other.GetComponentInParent<PlayerDamageReceiver>();
@@ -38,17 +59,25 @@ public class DamageHazard : MonoBehaviour
             return;
         }
 
+        if (hazardCollider != null)
+        {
+            damageSourcePosition =
+                hazardCollider.ClosestPoint(
+                    other.transform.position
+                );
+        }
+
         bool damageWasApplied =
             damageReceiver.TakeDamage(
                 lifeForceDamage,
-                transform.position
+                damageSourcePosition
             );
 
-        if (damageWasApplied && logSuccessfulHits)
+        if (damageWasApplied &&
+            logSuccessfulHits)
         {
             Debug.Log(
-                $"{name} dealt {lifeForceDamage} " +
-                $"Life Force damage to {other.name}.",
+                $"{name} dealt {lifeForceDamage} Life Force damage to {other.name}.",
                 this
             );
         }
