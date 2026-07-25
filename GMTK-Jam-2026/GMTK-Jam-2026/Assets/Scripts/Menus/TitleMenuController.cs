@@ -7,6 +7,7 @@ public class TitleMenuController : MonoBehaviour
     [Header("Panels")]
     [SerializeField] private GameObject titleBackground;
     [SerializeField] private GameObject optionsPanel;
+    [SerializeField] private GameObject levelSelectPanel;
 
     [Header("Main Menu Buttons")]
     [SerializeField] private Button playButton;
@@ -16,34 +17,72 @@ public class TitleMenuController : MonoBehaviour
     [Header("Options Buttons")]
     [SerializeField] private Button optionsBackButton;
 
+    [Header("Level Select Buttons")]
+    [SerializeField] private Button levelOneButton;
+    [SerializeField] private Button levelSelectBackButton;
+
     [Header("Scenes")]
-    [SerializeField] private string levelSelectSceneName = "LevelSelect";
+    [SerializeField]
+    private string levelOneSceneName =
+        "Level-1";
+
+    private static bool openLevelSelectOnLoad;
 
     private void Awake()
     {
-        ShowMainMenu();
+        if (openLevelSelectOnLoad)
+        {
+            openLevelSelectOnLoad = false;
+            ShowLevelSelect();
+        }
+        else
+        {
+            ShowMainMenu();
+        }
     }
 
     private void OnEnable()
     {
         if (playButton != null)
         {
-            playButton.onClick.AddListener(OpenLevelSelect);
+            playButton.onClick.AddListener(
+                ShowLevelSelect
+            );
         }
 
         if (optionsButton != null)
         {
-            optionsButton.onClick.AddListener(ShowOptions);
+            optionsButton.onClick.AddListener(
+                ShowOptions
+            );
         }
 
         if (quitButton != null)
         {
-            quitButton.onClick.AddListener(QuitGame);
+            quitButton.onClick.AddListener(
+                QuitGame
+            );
         }
 
         if (optionsBackButton != null)
         {
-            optionsBackButton.onClick.AddListener(ShowMainMenu);
+            optionsBackButton.onClick.AddListener(
+                ShowMainMenu
+            );
+        }
+
+        if (levelOneButton != null)
+        {
+            levelOneButton.onClick.AddListener(
+                LoadLevelOne
+            );
+        }
+
+        if (levelSelectBackButton != null)
+        {
+            levelSelectBackButton.onClick.AddListener(
+                ShowMainMenu
+            );
         }
     }
 
@@ -51,40 +90,78 @@ public class TitleMenuController : MonoBehaviour
     {
         if (playButton != null)
         {
-            playButton.onClick.RemoveListener(OpenLevelSelect);
+            playButton.onClick.RemoveListener(
+                ShowLevelSelect
+            );
         }
 
         if (optionsButton != null)
         {
-            optionsButton.onClick.RemoveListener(ShowOptions);
+            optionsButton.onClick.RemoveListener(
+                ShowOptions
+            );
         }
 
         if (quitButton != null)
         {
-            quitButton.onClick.RemoveListener(QuitGame);
+            quitButton.onClick.RemoveListener(
+                QuitGame
+            );
         }
 
         if (optionsBackButton != null)
         {
-            optionsBackButton.onClick.RemoveListener(ShowMainMenu);
+            optionsBackButton.onClick.RemoveListener(
+                ShowMainMenu
+            );
         }
+
+        if (levelOneButton != null)
+        {
+            levelOneButton.onClick.RemoveListener(
+                LoadLevelOne
+            );
+        }
+
+        if (levelSelectBackButton != null)
+        {
+            levelSelectBackButton.onClick.RemoveListener(
+                ShowMainMenu
+            );
+        }
+    }
+
+    public static void RequestLevelSelectOnLoad()
+    {
+        openLevelSelectOnLoad = true;
     }
 
     public void ShowMainMenu()
     {
         SetPanelActive(titleBackground, true);
         SetPanelActive(optionsPanel, false);
+        SetPanelActive(levelSelectPanel, false);
     }
 
     public void ShowOptions()
     {
         SetPanelActive(titleBackground, false);
         SetPanelActive(optionsPanel, true);
+        SetPanelActive(levelSelectPanel, false);
     }
 
-    public void OpenLevelSelect()
+    public void ShowLevelSelect()
     {
-        SceneManager.LoadScene(levelSelectSceneName);
+        SetPanelActive(titleBackground, false);
+        SetPanelActive(optionsPanel, false);
+        SetPanelActive(levelSelectPanel, true);
+    }
+
+    public void LoadLevelOne()
+    {
+        SceneManager.LoadScene(
+            levelOneSceneName
+        );
     }
 
     public void QuitGame()

@@ -31,20 +31,16 @@ public class LifeForceTimer : MonoBehaviour
             return;
         }
 
-        currentLifeForce -= Time.deltaTime;
-
-        if (currentLifeForce <= 0f)
-        {
-            currentLifeForce = 0f;
-            HandleLifeForceDepleted();
-        }
-
-        UpdateDisplay();
+        RemoveLifeForce(Time.deltaTime);
     }
 
     public void BeginCountdown(float startingLifeForce)
     {
-        currentLifeForce = Mathf.Max(0f, startingLifeForce);
+        currentLifeForce = Mathf.Max(
+            0f,
+            startingLifeForce
+        );
+
         depletionWasTriggered = false;
         countdownIsRunning = currentLifeForce > 0f;
 
@@ -61,15 +57,72 @@ public class LifeForceTimer : MonoBehaviour
         countdownIsRunning = false;
     }
 
+    public void RemoveLifeForce(float amount)
+    {
+        if (!countdownIsRunning)
+        {
+            return;
+        }
+
+        if (amount <= 0f)
+        {
+            return;
+        }
+
+        if (depletionWasTriggered)
+        {
+            return;
+        }
+
+        currentLifeForce = Mathf.Max(
+            0f,
+            currentLifeForce - amount
+        );
+
+        UpdateDisplay();
+
+        if (currentLifeForce <= 0f)
+        {
+            HandleLifeForceDepleted();
+        }
+    }
+
     public void RestoreLifeForce(float amount)
     {
+        if (!countdownIsRunning)
+        {
+            return;
+        }
+
         if (amount <= 0f)
+        {
+            return;
+        }
+
+        if (depletionWasTriggered)
         {
             return;
         }
 
         currentLifeForce += amount;
         UpdateDisplay();
+    }
+
+    public void DepleteLifeForce()
+    {
+        if (!countdownIsRunning)
+        {
+            return;
+        }
+
+        if (depletionWasTriggered)
+        {
+            return;
+        }
+
+        currentLifeForce = 0f;
+        UpdateDisplay();
+        HandleLifeForceDepleted();
     }
 
     private void HandleLifeForceDepleted()
@@ -82,6 +135,7 @@ public class LifeForceTimer : MonoBehaviour
         }
 
         depletionWasTriggered = true;
+
         UpdateDisplay();
         LifeForceDepleted?.Invoke();
     }

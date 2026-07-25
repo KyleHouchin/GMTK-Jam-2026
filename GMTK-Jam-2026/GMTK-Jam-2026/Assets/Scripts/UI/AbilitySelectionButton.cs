@@ -8,7 +8,7 @@ public class AbilitySelectionButton : MonoBehaviour
     public enum AbilityType
     {
         BatRush,
-        WingedLeap,
+        Glide,
         BloodShot
     }
 
@@ -90,11 +90,12 @@ public class AbilitySelectionButton : MonoBehaviour
 
     private void DetectAbilityFromObjectName()
     {
-        string objectName = gameObject.name.ToLowerInvariant();
+        string objectName =
+            gameObject.name.ToLowerInvariant();
 
-        if (objectName.Contains("doublejump"))
+        if (objectName.Contains("glide"))
         {
-            abilityType = AbilityType.WingedLeap;
+            abilityType = AbilityType.Glide;
             return;
         }
 
@@ -112,7 +113,7 @@ public class AbilitySelectionButton : MonoBehaviour
 
         Debug.LogWarning(
             $"Could not automatically determine the ability for {gameObject.name}. " +
-            "Name it DashButton, DoubleJumpButton, or BloodButton.",
+            "Name it DashButton, GlideButton, or BloodButton.",
             this
         );
     }
@@ -127,10 +128,10 @@ public class AbilitySelectionButton : MonoBehaviour
                 description = "Dash forward quickly";
                 break;
 
-            case AbilityType.WingedLeap:
-                abilityId = "DoubleJump";
-                displayName = "WINGED LEAP";
-                description = "Jump a second time while airborne";
+            case AbilityType.Glide:
+                abilityId = "Glide";
+                displayName = "DRACULA GLIDE";
+                description = "Glide through the air and descend more slowly";
                 break;
 
             case AbilityType.BloodShot:
@@ -164,7 +165,8 @@ public class AbilitySelectionButton : MonoBehaviour
     {
         if (buttonLabel == null)
         {
-            buttonLabel = GetComponentInChildren<TMP_Text>();
+            buttonLabel =
+                GetComponentInChildren<TMP_Text>();
         }
 
         DetectAbilityFromObjectName();

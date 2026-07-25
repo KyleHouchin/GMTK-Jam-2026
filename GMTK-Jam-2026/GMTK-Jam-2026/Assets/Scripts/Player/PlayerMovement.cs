@@ -14,15 +14,12 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Dash Mechanics")]
     [SerializeField] private float dashCooldown = 3f;
-    [SerializeField] private float dashDuration = 0.15f;
-    [SerializeField] private float dashFactor = 5;
+    [SerializeField] private float dashDuration = 0.12f;
+    [SerializeField] private float dashFactor = 2.25f;
 
     [Header("Glide Mechanics")]
     [SerializeField] private float glideVelocity = -1.5f;
-    private bool wasGlidingLastFrame = false;
-    private bool isGliding = false;
-    bool isTooCloseToGroundToGlide = false; // transform back to vampire if too close to ground
-
+    [SerializeField, Min(0.01f)] private float glideGroundStopDistance = 0.4f;
 
     [Header("Jumping")]
     [SerializeField] private float jumpForce = 12f;
@@ -34,8 +31,6 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundLayer;
-    private float maxGroundDistanceRayCast = 50.0f;
-    private float distanceToGround;
 
     [Header("Input")]
     [SerializeField] private InputActionReference moveAction;
@@ -43,8 +38,13 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Animation")]
     [SerializeField] private Animator anim;
-    private bool facingRight = true;
 
+    [Header("Runtime Speed Modifier")]
+    [SerializeField] private float externalSpeedMultiplier = 1f;
+
+    public float ExternalSpeedMultiplier => externalSpeedMultiplier;
+    public bool IsTooCloseToGroundToGlide => isTooCloseToGroundToGlide;
+    public float DistanceToGround => distanceToGround;
 
     private Rigidbody2D playerRigidbody;
 
@@ -53,16 +53,30 @@ public class PlayerMovement : MonoBehaviour
     private float jumpBufferCounter;
     private float dashCooldownCounter;
     private float baseGravityScale;
+    private float dashDirection;
+    private float distanceToGround = -1f;
 
     private bool isGrounded;
     private bool jumpReleased;
     private bool isDashing;
+    private bool isGliding;
+    private bool wasGlidingLastFrame;
+    private bool isTooCloseToGroundToGlide;
     private bool hasAirDash;
+    private bool facingRight = true;
+
+    // These store references to the currently running Dash and Glide coroutines.
+    // Keeping the references lets us safely stop them when gameplay is disabled
+    // or when another action interrupts the ability.
+    private Coroutine dashRoutine;
+    private Coroutine glideRoutine;
 
     private void Awake()
     {
         playerRigidbody = GetComponent<Rigidbody2D>();
         baseGravityScale = playerRigidbody.gravityScale;
+
+        ResetExternalSpeedMultiplier();
     }
 
     private void OnEnable()
@@ -93,16 +107,21 @@ public class PlayerMovement : MonoBehaviour
             jumpAction.action.canceled -= OnJumpCanceled;
             jumpAction.action.Disable();
         }
+
+        EndDash();
+        EndGlide();
+
+        horizontalInput = 0f;
     }
 
     private void Update()
     {
         ReadMovementInput();
         CheckIfGrounded();
+        UpdateGroundDistance();
         UpdateCoyoteTime();
         UpdateJumpBuffer();
         UpdateDashCooldownCounter();
-        UpdateGroundDistance();
         UpdateAnimation();
     }
 
@@ -138,59 +157,104 @@ public class PlayerMovement : MonoBehaviour
             groundCheckRadius,
             groundLayer
         );
-        if(isGrounded)
+
+        if (isGrounded)
         {
+            // Landing restores the player's one allowed air Dash.
             hasAirDash = true;
+
+            if (isGliding)
+            {
+                EndGlide();
+            }
         }
     }
 
     private void UpdateGroundDistance()
     {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, maxGroundDistanceRayCast, groundLayer);
-
-        if (hit != null)
+        if (groundCheck == null)
         {
-            // hit!
-            distanceToGround = hit.distance;
-            Debug.DrawLine(transform.position, hit.point, Color.green);
+            distanceToGround = -1f;
+            isTooCloseToGroundToGlide = false;
+            return;
+        }
+
+        RaycastHit2D groundHit = Physics2D.Raycast(
+            groundCheck.position,
+            Vector2.down,
+            glideGroundStopDistance,
+            groundLayer
+        );
+
+        if (groundHit.collider != null)
+        {
+            distanceToGround = groundHit.distance;
+            isTooCloseToGroundToGlide = true;
+
+            Debug.DrawLine(
+                groundCheck.position,
+                groundHit.point,
+                Color.green
+            );
         }
         else
         {
-            // no hit
-            distanceToGround = -1;
-            Debug.Log("No Ground detected under player");
-        }
+            distanceToGround = -1f;
+            isTooCloseToGroundToGlide = false;
 
-        isTooCloseToGroundToGlide = (distanceToGround > 0 && distanceToGround < 1.0f);
+            Debug.DrawLine(
+                groundCheck.position,
+                groundCheck.position + Vector3.down * glideGroundStopDistance,
+                Color.red
+            );
+        }
     }
 
     private void UpdateAnimation()
     {
-        anim.SetFloat("horizontal", Mathf.Abs(playerRigidbody.linearVelocity.x));
-        anim.SetFloat("vertical", playerRigidbody.linearVelocity.y);
-        anim.SetBool("isGliding", isGliding);
+        if (anim != null)
+        {
+            anim.SetFloat(
+                "horizontal",
+                Mathf.Abs(playerRigidbody.linearVelocity.x)
+            );
 
-        if ( (facingRight && horizontalInput < 0) ||
-             (!facingRight && horizontalInput > 0) )
+            anim.SetFloat(
+                "vertical",
+                playerRigidbody.linearVelocity.y
+            );
+
+            anim.SetBool(
+                "isGliding",
+                isGliding
+            );
+
+            // Transform from bat back into a vampire.
+            // The same transformation animation is played backward.
+            bool isBecomingVampire = !isGliding && wasGlidingLastFrame;
+
+            // Transform from vampire into a bat.
+            // The transformation animation is played forward.
+            bool isBecomingBat = isGliding && !wasGlidingLastFrame;
+
+            if (isBecomingBat)
+            {
+                anim.SetFloat("transform_anim_speed", 1f);
+                anim.Play("vampire_to_bat", 0, 0f);
+            }
+            else if (isBecomingVampire)
+            {
+                anim.SetFloat("transform_anim_speed", -1f);
+                anim.Play("vampire_to_bat", 0, 1f);
+            }
+        }
+
+        bool shouldFaceLeft = facingRight && horizontalInput < 0f;
+        bool shouldFaceRight = !facingRight && horizontalInput > 0f;
+
+        if (shouldFaceLeft || shouldFaceRight)
         {
             FlipFacingDirection();
-        }
-
-        // transform from bat to vampire (play vampire_to_bat in reverse)
-        bool isBecomingVampire = !isGliding && wasGlidingLastFrame;
-        // transform from vampire to bat (play vampire_to_bat forward)
-        bool isBecomingBat = isGliding && !wasGlidingLastFrame;
-        if (isBecomingBat)
-        {
-            anim.SetFloat("transform_anim_speed", 1.0f); // play forward
-
-            anim.Play("vampire_to_bat", 0, 0.0f); // start from beginning
-        }
-        else if (isBecomingVampire)
-        {
-            anim.SetFloat("transform_anim_speed", -1.0f); // play in reverse
-
-            anim.Play("vampire_to_bat", 0, 1.0f); // start from end
         }
 
         wasGlidingLastFrame = isGliding;
@@ -198,7 +262,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void FlipFacingDirection()
     {
-        transform.Rotate(0, 180, 0);
+        transform.Rotate(0f, 180f, 0f);
         facingRight = !facingRight;
     }
 
@@ -224,28 +288,39 @@ public class PlayerMovement : MonoBehaviour
 
     private void ApplyHorizontalMovement()
     {
-        float newHorizontalSpeed = 0;
-        if(!isDashing)
-        {
-            float targetSpeed = horizontalInput * maximumMoveSpeed;
-            float currentSpeed = playerRigidbody.linearVelocity.x;
+        float newHorizontalSpeed;
 
+        if (!isDashing)
+        {
+            float targetSpeed = horizontalInput * maximumMoveSpeed * externalSpeedMultiplier;
+            float currentSpeed = playerRigidbody.linearVelocity.x;
             bool playerIsTryingToMove = Mathf.Abs(horizontalInput) > 0.01f;
 
             float speedChangeRate;
 
             if (isGrounded)
             {
-                speedChangeRate = playerIsTryingToMove
-                    ? groundAcceleration
-                    : groundDeceleration;
+                if (playerIsTryingToMove)
+                {
+                    speedChangeRate = groundAcceleration;
+                }
+                else
+                {
+                    speedChangeRate = groundDeceleration;
+                }
             }
             else
             {
-                speedChangeRate = playerIsTryingToMove
-                    ? airAcceleration
-                    : airDeceleration;
+                if (playerIsTryingToMove)
+                {
+                    speedChangeRate = airAcceleration;
+                }
+                else
+                {
+                    speedChangeRate = airDeceleration;
+                }
             }
+
             newHorizontalSpeed = Mathf.MoveTowards(
                 currentSpeed,
                 targetSpeed,
@@ -254,11 +329,12 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            newHorizontalSpeed = maximumMoveSpeed * dashFactor * horizontalInput;
+            newHorizontalSpeed =
+                maximumMoveSpeed *
+                dashFactor *
+                dashDirection *
+                externalSpeedMultiplier;
         }
-        
-
-        
 
         playerRigidbody.linearVelocity = new Vector2(
             newHorizontalSpeed,
@@ -276,6 +352,8 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
+        EndGlide();
+
         playerRigidbody.linearVelocity = new Vector2(
             playerRigidbody.linearVelocity.x,
             jumpForce
@@ -284,6 +362,11 @@ public class PlayerMovement : MonoBehaviour
         coyoteTimeCounter = 0f;
         jumpBufferCounter = 0f;
         jumpReleased = false;
+
+        if (SoundEffectsManager.Instance != null)
+        {
+            SoundEffectsManager.Instance.PlayJumpSound();
+        }
     }
 
     private void ApplyVariableJumpHeight()
@@ -306,7 +389,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateDashCooldownCounter()
     {
-        dashCooldownCounter += Time.deltaTime;
+        if (!isDashing)
+        {
+            dashCooldownCounter += Time.deltaTime;
+        }
     }
 
     private void OnJumpPerformed(InputAction.CallbackContext context)
@@ -320,6 +406,196 @@ public class PlayerMovement : MonoBehaviour
         jumpReleased = true;
     }
 
+    public void SetExternalSpeedMultiplier(float multiplier)
+    {
+        externalSpeedMultiplier = Mathf.Max(0f, multiplier);
+    }
+
+    public void ResetExternalSpeedMultiplier()
+    {
+        externalSpeedMultiplier = 1f;
+    }
+
+    public void SetDash()
+    {
+        // Do not begin another Dash while one is active or while Dash is cooling down.
+        if (isDashing || dashCooldownCounter < dashCooldown)
+        {
+            return;
+        }
+
+        // The player gets one Dash while airborne.
+        // Landing restores hasAirDash inside CheckIfGrounded().
+        if (!isGrounded)
+        {
+            if (!hasAirDash)
+            {
+                return;
+            }
+
+            hasAirDash = false;
+        }
+
+        // Dashing interrupts Glide and restores normal gravity first.
+        EndGlide();
+
+        // Save the Dash direction when the Dash begins.
+        // This prevents changing or canceling the Dash by changing input midway through it.
+        if (Mathf.Abs(horizontalInput) > 0.01f)
+        {
+            dashDirection = Mathf.Sign(horizontalInput);
+        }
+        else if (facingRight)
+        {
+            dashDirection = 1f;
+        }
+        else
+        {
+            dashDirection = -1f;
+        }
+
+        isDashing = true;
+
+        if (SoundEffectsManager.Instance != null)
+        {
+            SoundEffectsManager.Instance.PlayDashSound();
+        }
+
+        // This should normally be null because another Dash cannot start while isDashing is true.
+        // The check still prevents an old coroutine from remaining active unexpectedly.
+        if (dashRoutine != null)
+        {
+            StopCoroutine(dashRoutine);
+        }
+
+        dashRoutine = StartCoroutine(DashCounter());
+    }
+
+    private IEnumerator DashCounter()
+    {
+        // Keep Dash active for the configured Dash duration.
+        yield return new WaitForSeconds(dashDuration);
+
+        // Clear the coroutine reference before calling EndDash().
+        // EndDash() will finish the ability without attempting to stop this completed coroutine.
+        dashRoutine = null;
+        EndDash();
+    }
+
+    private void EndDash()
+    {
+        // EndDash() can also be called early when PlayerMovement is disabled.
+        // If the Dash coroutine is still running, stop and clear it.
+        if (dashRoutine != null)
+        {
+            StopCoroutine(dashRoutine);
+            dashRoutine = null;
+        }
+
+        if (!isDashing)
+        {
+            return;
+        }
+
+        isDashing = false;
+        dashCooldownCounter = 0f;
+
+        if (playerRigidbody != null)
+        {
+            // Return to normal movement speed after the Dash ends.
+            playerRigidbody.linearVelocity = new Vector2(
+                maximumMoveSpeed * horizontalInput * externalSpeedMultiplier,
+                playerRigidbody.linearVelocity.y
+            );
+        }
+    }
+
+    public void StartGlide()
+    {
+        // Glide can only begin while falling and far enough above the ground.
+        if (isGrounded ||
+            isTooCloseToGroundToGlide ||
+            isGliding ||
+            !IsMovingDown())
+        {
+            return;
+        }
+
+        isGliding = true;
+        playerRigidbody.gravityScale = 0f;
+        playerRigidbody.linearVelocityY = glideVelocity;
+
+        if (SoundEffectsManager.Instance != null)
+        {
+            SoundEffectsManager.Instance.StartGlideSound();
+        }
+
+        // Prevent multiple Glide coroutines from controlling gravity and velocity at once.
+        if (glideRoutine != null)
+        {
+            StopCoroutine(glideRoutine);
+        }
+
+        glideRoutine = StartCoroutine(GlideCounter());
+    }
+
+    public bool IsGrounded()
+    {
+        return isGrounded;
+    }
+
+    public bool IsMovingDown()
+    {
+        return playerRigidbody.linearVelocityY < 0f;
+    }
+
+    private IEnumerator GlideCounter()
+    {
+        // Keep Glide active while the player is falling, holding Space,
+        // and has not reached the configured ground cutoff distance.
+        while (!isGrounded &&
+               !isTooCloseToGroundToGlide &&
+               IsMovingDown() &&
+               Keyboard.current != null &&
+               Keyboard.current.spaceKey.isPressed)
+        {
+            playerRigidbody.linearVelocityY = glideVelocity;
+            yield return null;
+        }
+
+        // Clear the reference first because this coroutine has finished naturally.
+        glideRoutine = null;
+        EndGlide();
+    }
+
+    private void EndGlide()
+    {
+        // EndGlide() may also be called by landing, jumping, dashing,
+        // reaching the ground cutoff, or disabling PlayerMovement.
+        if (glideRoutine != null)
+        {
+            StopCoroutine(glideRoutine);
+            glideRoutine = null;
+        }
+
+        if (!isGliding)
+        {
+            return;
+        }
+
+        isGliding = false;
+
+        if (playerRigidbody != null)
+        {
+            playerRigidbody.gravityScale = baseGravityScale;
+        }
+
+        if (SoundEffectsManager.Instance != null)
+        {
+            SoundEffectsManager.Instance.StopGlideSound();
+        }
+    }
+
     private void OnDrawGizmosSelected()
     {
         if (groundCheck == null)
@@ -331,69 +607,10 @@ public class PlayerMovement : MonoBehaviour
             groundCheck.position,
             groundCheckRadius
         );
-    }
 
-    public void SetDash()
-    {
-        if(!isDashing && dashCooldownCounter > dashCooldown) {    //Player is not currently dashing
-            if(!isGrounded)
-            {
-                if(!hasAirDash)
-                {
-                    return; //This handles the case where the player is in the air but has already dashed once
-                }
-                else
-                {
-                    hasAirDash = false;
-                }
-            }
-            isDashing = true;
-            StartCoroutine(DashCounter());
-        }
-    }
-
-    private IEnumerator DashCounter()
-    {
-        yield return new WaitForSeconds(dashDuration);
-        isDashing = false;
-        dashCooldownCounter = 0;
-        playerRigidbody.linearVelocity = new Vector2(maximumMoveSpeed * horizontalInput, playerRigidbody.linearVelocity.y);
-    }
-
-    public void StartGlide()
-    {
-        if(!isGrounded && !isTooCloseToGroundToGlide)
-        {
-            //Turn off gravity, set vertical velocity to slow set value
-            playerRigidbody.gravityScale = 0;
-            float prevYVelocity = playerRigidbody.linearVelocityY;
-            playerRigidbody.linearVelocityY = glideVelocity;
-            StartCoroutine(GlideCounter(prevYVelocity));
-            isGliding = true;
-        }
-    }
-
-    public bool IsGrounded()
-    {
-        return isGrounded;
-    }
-
-    public bool IsMovingDown()
-    {
-        return playerRigidbody.linearVelocityY < 0;
-    }
-
-    private IEnumerator GlideCounter(float prevYVelocity)
-    {
-        while(!isGrounded && IsMovingDown() && Keyboard.current.spaceKey.isPressed)
-        {
-            if (isTooCloseToGroundToGlide) 
-                break;
-
-            yield return null;
-        }
-        playerRigidbody.gravityScale = baseGravityScale;
-        playerRigidbody.linearVelocityY = prevYVelocity;
-        isGliding = false;
+        Gizmos.DrawLine(
+            groundCheck.position,
+            groundCheck.position + Vector3.down * glideGroundStopDistance
+        );
     }
 }

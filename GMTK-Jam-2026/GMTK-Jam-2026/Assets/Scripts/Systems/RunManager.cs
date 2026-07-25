@@ -27,12 +27,14 @@ public class RunManager : MonoBehaviour
 
     [Header("Player")]
     [SerializeField] private PlayerMovement playerMovement;
+    [SerializeField] private PlayerAbility playerAbility;
     [SerializeField] private PlayerLoadout playerLoadout;
     [SerializeField] private Rigidbody2D playerRigidbody;
 
     [Header("Scene Names")]
-    [SerializeField] private string titleSceneName = "TitleScreen";
-    [SerializeField] private string levelSelectSceneName = "LevelSelect";
+    [SerializeField]
+    private string titleSceneName =
+        "TitleScreen";
 
     [Header("Run State")]
     [SerializeField] private bool runHasStarted;
@@ -52,22 +54,30 @@ public class RunManager : MonoBehaviour
     {
         if (startRunButton != null)
         {
-            startRunButton.onClick.AddListener(StartRun);
+            startRunButton.onClick.AddListener(
+                StartRun
+            );
         }
 
         if (retryButton != null)
         {
-            retryButton.onClick.AddListener(RetryLevel);
+            retryButton.onClick.AddListener(
+                RetryLevel
+            );
         }
 
         if (quitButton != null)
         {
-            quitButton.onClick.AddListener(ReturnToTitle);
+            quitButton.onClick.AddListener(
+                ReturnToTitle
+            );
         }
 
         if (victoryRetryButton != null)
         {
-            victoryRetryButton.onClick.AddListener(RetryLevel);
+            victoryRetryButton.onClick.AddListener(
+                RetryLevel
+            );
         }
 
         if (levelSelectButton != null)
@@ -88,22 +98,30 @@ public class RunManager : MonoBehaviour
     {
         if (startRunButton != null)
         {
-            startRunButton.onClick.RemoveListener(StartRun);
+            startRunButton.onClick.RemoveListener(
+                StartRun
+            );
         }
 
         if (retryButton != null)
         {
-            retryButton.onClick.RemoveListener(RetryLevel);
+            retryButton.onClick.RemoveListener(
+                RetryLevel
+            );
         }
 
         if (quitButton != null)
         {
-            quitButton.onClick.RemoveListener(ReturnToTitle);
+            quitButton.onClick.RemoveListener(
+                ReturnToTitle
+            );
         }
 
         if (victoryRetryButton != null)
         {
-            victoryRetryButton.onClick.RemoveListener(RetryLevel);
+            victoryRetryButton.onClick.RemoveListener(
+                RetryLevel
+            );
         }
 
         if (levelSelectButton != null)
@@ -122,7 +140,9 @@ public class RunManager : MonoBehaviour
 
     public void StartRun()
     {
-        if (runHasStarted || gameIsOver || runWasCompleted)
+        if (runHasStarted ||
+            gameIsOver ||
+            runWasCompleted)
         {
             return;
         }
@@ -159,12 +179,15 @@ public class RunManager : MonoBehaviour
 
     public void CompleteRun()
     {
-        if (!runHasStarted || gameIsOver || runWasCompleted)
+        if (!runHasStarted ||
+            gameIsOver ||
+            runWasCompleted)
         {
             return;
         }
 
         runHasStarted = false;
+        gameIsOver = false;
         runWasCompleted = true;
 
         if (lifeForceTimer != null)
@@ -186,6 +209,18 @@ public class RunManager : MonoBehaviour
                 $"LIFE FORCE REMAINING: " +
                 $"{lifeForceTimer.CurrentLifeForce:0.0}";
         }
+
+        if (SoundEffectsManager.Instance != null)
+        {
+            SoundEffectsManager.Instance
+                .PlayVictorySound();
+        }
+
+        if (MusicManager.Instance != null)
+        {
+            MusicManager.Instance
+                .PlayVictoryMusic();
+        }
     }
 
     public void RetryLevel()
@@ -197,12 +232,18 @@ public class RunManager : MonoBehaviour
 
     public void ReturnToTitle()
     {
-        SceneManager.LoadScene(titleSceneName);
+        SceneManager.LoadScene(
+            titleSceneName
+        );
     }
 
     public void ReturnToLevelSelect()
     {
-        SceneManager.LoadScene(levelSelectSceneName);
+        TitleMenuController.RequestLevelSelectOnLoad();
+
+        SceneManager.LoadScene(
+            titleSceneName
+        );
     }
 
     private void PrepareShop()
@@ -232,31 +273,40 @@ public class RunManager : MonoBehaviour
     private void SaveSelectedLoadout()
     {
         bool batRushSelected =
-            altarManager.IsAbilitySelected("Dash");
+            altarManager.IsAbilitySelected(
+                "Dash"
+            );
 
-        bool wingedLeapSelected =
-            altarManager.IsAbilitySelected("DoubleJump");
+        bool glideSelected =
+            altarManager.IsAbilitySelected(
+                "Glide"
+            );
 
         bool bloodShotSelected =
-            altarManager.IsAbilitySelected("BloodShot");
+            altarManager.IsAbilitySelected(
+                "BloodShot"
+            );
 
         playerLoadout.ConfigureLoadout(
             altarManager.RemainingLifeForce,
             batRushSelected,
-            wingedLeapSelected,
+            glideSelected,
             bloodShotSelected
         );
     }
 
     private void HandleLifeForceDepleted()
     {
-        if (!runHasStarted || gameIsOver || runWasCompleted)
+        if (!runHasStarted ||
+            gameIsOver ||
+            runWasCompleted)
         {
             return;
         }
 
         runHasStarted = false;
         gameIsOver = true;
+        runWasCompleted = false;
 
         if (lifeForceTimer != null)
         {
@@ -269,6 +319,18 @@ public class RunManager : MonoBehaviour
         SetPanelActive(gameplayHUD, false);
         SetPanelActive(victoryPanel, false);
         SetPanelActive(gameOverPanel, true);
+
+        if (SoundEffectsManager.Instance != null)
+        {
+            SoundEffectsManager.Instance
+                .PlayGameOverSound();
+        }
+
+        if (MusicManager.Instance != null)
+        {
+            MusicManager.Instance
+                .PlayGameOverMusic();
+        }
     }
 
     private void SetPlayerGameplayEnabled(bool enabled)
@@ -278,12 +340,19 @@ public class RunManager : MonoBehaviour
             playerMovement.enabled = enabled;
         }
 
+        if (playerAbility != null)
+        {
+            playerAbility.enabled = enabled;
+        }
+
         if (playerRigidbody == null)
         {
             return;
         }
 
-        playerRigidbody.linearVelocity = Vector2.zero;
+        playerRigidbody.linearVelocity =
+            Vector2.zero;
+
         playerRigidbody.simulated = enabled;
     }
 

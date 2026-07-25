@@ -1,28 +1,51 @@
-using System;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody2D))]
 public class ProjectileController : MonoBehaviour
 {
-    private Rigidbody2D rigidbody;
-    [SerializeField] private float projectileSpeed = 8f;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Awake()
+    [Header("Movement")]
+    [SerializeField, Min(0f)]
+    private float projectileSpeed = 12f;
+
+    [Header("Lifetime")]
+    [SerializeField, Min(0.1f)]
+    private float maximumLifetime = 5f;
+
+    private Rigidbody2D projectileRigidbody;
+
+    private void Awake()
     {
-        rigidbody = GetComponent<Rigidbody2D>();
+        projectileRigidbody =
+            GetComponent<Rigidbody2D>();
     }
 
-    public void setVelocityDirection(Vector2 direction)
+    private void Start()
     {
+        Destroy(
+            gameObject,
+            maximumLifetime
+        );
+    }
+
+    public void SetVelocityDirection(
+        Vector2 direction)
+    {
+        if (projectileRigidbody == null)
+        {
+            return;
+        }
+
         direction.Normalize();
-        rigidbody.linearVelocity = direction * projectileSpeed;
+
+        projectileRigidbody.linearVelocity =
+            direction * projectileSpeed;
     }
 
-    // destroy the projectile when it hits the ground
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnCollisionEnter2D(
+        Collision2D collision)
     {
-        string ground_tag = "Ground";
-
-        if (collision.gameObject.CompareTag(ground_tag))
+        if (collision.gameObject
+            .CompareTag("Ground"))
         {
             Destroy(gameObject);
         }
