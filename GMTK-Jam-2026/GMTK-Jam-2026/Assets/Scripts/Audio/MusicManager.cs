@@ -26,8 +26,16 @@ public class MusicManager : MonoBehaviour
         "LevelSelect";
 
     [SerializeField]
-    private string gameplaySceneName =
-        "InitialLevel";
+    private string levelOneSceneName =
+        "Level-1";
+
+    [SerializeField]
+    private string levelTwoSceneName =
+        "Level-2";
+
+    [SerializeField]
+    private string levelThreeSceneName =
+        "Level-3";
 
     [Header("Playback Settings")]
     [SerializeField, Range(0f, 1f)]
@@ -138,7 +146,12 @@ public class MusicManager : MonoBehaviour
             return levelSelectMusic;
         }
 
-        if (sceneName == gameplaySceneName)
+        bool isGameplayScene =
+            sceneName == levelOneSceneName ||
+            sceneName == levelTwoSceneName ||
+            sceneName == levelThreeSceneName;
+
+        if (isGameplayScene)
         {
             return gameplayMusic;
         }
