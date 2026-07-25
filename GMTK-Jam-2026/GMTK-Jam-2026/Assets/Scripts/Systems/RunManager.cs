@@ -27,6 +27,7 @@ public class RunManager : MonoBehaviour
 
     [Header("Player")]
     [SerializeField] private PlayerMovement playerMovement;
+    [SerializeField] private PlayerAbility playerAbility;
     [SerializeField] private PlayerLoadout playerLoadout;
     [SerializeField] private Rigidbody2D playerRigidbody;
 
@@ -337,6 +338,11 @@ public class RunManager : MonoBehaviour
         if (playerMovement != null)
         {
             playerMovement.enabled = enabled;
+        }
+
+        if (playerAbility != null)
+        {
+            playerAbility.enabled = enabled;
         }
 
         if (playerRigidbody == null)

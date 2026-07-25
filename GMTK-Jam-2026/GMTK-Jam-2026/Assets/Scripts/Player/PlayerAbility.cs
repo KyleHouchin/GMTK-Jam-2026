@@ -1,36 +1,82 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(PlayerLoadout))]
 public class PlayerAbility : MonoBehaviour
 {
+    [Header("Projectile")]
     [SerializeField] private GameObject projectilePrefab;
+
+    [SerializeField, Min(0f)]
+    private float projectileSpawnDistance = 0.75f;
+
+    [SerializeField, Min(0f)]
+    private float projectileTimer = 1f;
+
+    [Header("Diagonal Shooting")]
+    [SerializeField, Range(0.02f, 0.3f)]
+    private float diagonalInputWindow = 0.12f;
 
     private PlayerMovement playerMovement;
     private PlayerLoadout playerLoadout;
+    private Collider2D[] playerColliders;
 
-    [SerializeField] private float projectileTimer = 1f;    //1 second between projectiles
     private float projectileTimerCounter;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private bool projectileInputPending;
+    private float projectileInputStartTime;
+
+    private float lastUpPressTime =
+        float.NegativeInfinity;
+
+    private float lastDownPressTime =
+        float.NegativeInfinity;
+
+    private float lastLeftPressTime =
+        float.NegativeInfinity;
+
+    private float lastRightPressTime =
+        float.NegativeInfinity;
+
+    private void Awake()
     {
-        playerMovement = GetComponent<PlayerMovement>();
-        playerLoadout = GetComponent<PlayerLoadout>();
+        playerMovement =
+            GetComponent<PlayerMovement>();
+
+        playerLoadout =
+            GetComponent<PlayerLoadout>();
+
+        playerColliders =
+            GetComponentsInChildren<Collider2D>();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnEnable()
+    {
+        projectileTimerCounter =
+            projectileTimer;
+
+        ClearPendingProjectileInput();
+    }
+
+    private void OnDisable()
+    {
+        ClearPendingProjectileInput();
+    }
+
+    private void Update()
     {
         if (Keyboard.current == null)
         {
             return;
         }
 
-        projectileTimerCounter += Time.deltaTime;
+        projectileTimerCounter +=
+            Time.deltaTime;
 
-        if (Keyboard.current.leftShiftKey.wasPressedThisFrame &&
+        if (Keyboard.current.leftShiftKey
+                .wasPressedThisFrame &&
             CanUseDash())
         {
             playerMovement.SetDash();
@@ -46,7 +92,7 @@ public class PlayerAbility : MonoBehaviour
 
         if (CanUseProjectile())
         {
-            ShootProjectile();
+            UpdateProjectileInput();
         }
     }
 
@@ -80,68 +126,263 @@ public class PlayerAbility : MonoBehaviour
         return playerLoadout.HasBloodShot;
     }
 
-    private void ShootProjectile()
+    private void UpdateProjectileInput()
     {
-        if (projectileTimerCounter < projectileTimer)    //Not enough time since last projectile
+        RecordProjectileKeyPresses();
+
+        if (!projectileInputPending)
         {
-            return;
+            if (!WasProjectileInputPressed())
+            {
+                return;
+            }
+
+            if (projectileTimerCounter <
+                projectileTimer)
+            {
+                return;
+            }
+
+            if (projectilePrefab == null)
+            {
+                return;
+            }
+
+            projectileInputPending = true;
+
+            projectileInputStartTime =
+                Time.unscaledTime;
         }
 
-        if (projectilePrefab == null)
+        Vector2 direction =
+            ReadBufferedProjectileDirection();
+
+        bool hasDiagonalDirection =
+            Mathf.Abs(direction.x) > 0.01f &&
+            Mathf.Abs(direction.y) > 0.01f;
+
+        bool inputWindowExpired =
+            Time.unscaledTime -
+            projectileInputStartTime >=
+            diagonalInputWindow;
+
+        if (hasDiagonalDirection ||
+            inputWindowExpired)
         {
-            Debug.LogWarning(
-                $"{name} does not have a projectile prefab assigned.",
-                this
+            if (direction != Vector2.zero)
+            {
+                CreateProjectile(direction);
+            }
+
+            ClearPendingProjectileInput();
+        }
+    }
+
+    private void RecordProjectileKeyPresses()
+    {
+        if (Keyboard.current.upArrowKey
+            .wasPressedThisFrame)
+        {
+            lastUpPressTime =
+                Time.unscaledTime;
+        }
+
+        if (Keyboard.current.downArrowKey
+            .wasPressedThisFrame)
+        {
+            lastDownPressTime =
+                Time.unscaledTime;
+        }
+
+        if (Keyboard.current.leftArrowKey
+            .wasPressedThisFrame)
+        {
+            lastLeftPressTime =
+                Time.unscaledTime;
+        }
+
+        if (Keyboard.current.rightArrowKey
+            .wasPressedThisFrame)
+        {
+            lastRightPressTime =
+                Time.unscaledTime;
+        }
+    }
+
+    private bool WasProjectileInputPressed()
+    {
+        return
+            Keyboard.current.upArrowKey
+                .wasPressedThisFrame ||
+            Keyboard.current.downArrowKey
+                .wasPressedThisFrame ||
+            Keyboard.current.leftArrowKey
+                .wasPressedThisFrame ||
+            Keyboard.current.rightArrowKey
+                .wasPressedThisFrame;
+    }
+
+    private Vector2 ReadBufferedProjectileDirection()
+    {
+        bool pressingUp =
+            IsKeyActive(
+                Keyboard.current.upArrowKey,
+                lastUpPressTime
             );
 
-            return;
+        bool pressingDown =
+            IsKeyActive(
+                Keyboard.current.downArrowKey,
+                lastDownPressTime
+            );
+
+        bool pressingLeft =
+            IsKeyActive(
+                Keyboard.current.leftArrowKey,
+                lastLeftPressTime
+            );
+
+        bool pressingRight =
+            IsKeyActive(
+                Keyboard.current.rightArrowKey,
+                lastRightPressTime
+            );
+
+        float horizontalDirection = 0f;
+        float verticalDirection = 0f;
+
+        if (pressingLeft && !pressingRight)
+        {
+            horizontalDirection = -1f;
+        }
+        else if (pressingRight && !pressingLeft)
+        {
+            horizontalDirection = 1f;
         }
 
-        if (Keyboard.current.upArrowKey.wasPressedThisFrame)
+        if (pressingDown && !pressingUp)
         {
-            CreateProjectile(Vector2.up);
+            verticalDirection = -1f;
         }
-        else if (Keyboard.current.downArrowKey.wasPressedThisFrame)
+        else if (pressingUp && !pressingDown)
         {
-            CreateProjectile(Vector2.down);
+            verticalDirection = 1f;
         }
-        else if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
-        {
-            CreateProjectile(Vector2.left);
-        }
-        else if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
-        {
-            CreateProjectile(Vector2.right);
-        }
+
+        return new Vector2(
+            horizontalDirection,
+            verticalDirection
+        ).normalized;
+    }
+
+    private bool IsKeyActive(
+        KeyControl key,
+        float lastPressTime)
+    {
+        bool isHeld =
+            key != null &&
+            key.isPressed;
+
+        bool wasRecentlyPressed =
+            Time.unscaledTime -
+            lastPressTime <=
+            diagonalInputWindow;
+
+        return isHeld ||
+               wasRecentlyPressed;
     }
 
     private void CreateProjectile(
         Vector2 direction)
     {
-        ProjectileController projectile =
+        direction.Normalize();
+
+        Vector2 spawnPosition =
+            (Vector2)transform.position +
+            direction * projectileSpawnDistance;
+
+        GameObject projectileObject =
             Instantiate(
                 projectilePrefab,
-                transform.position,
+                spawnPosition,
                 Quaternion.identity
-            ).GetComponent<ProjectileController>();
+            );
+
+        ProjectileController projectile =
+            projectileObject
+                .GetComponent<ProjectileController>();
 
         if (projectile == null)
         {
-            Debug.LogWarning(
-                "The projectile prefab does not contain a ProjectileController.",
-                projectilePrefab
-            );
-
+            Destroy(projectileObject);
             return;
         }
 
-        projectile.setVelocityDirection(direction);
+        IgnorePlayerCollisions(
+            projectileObject
+        );
+
+        projectile.SetVelocityDirection(
+            direction
+        );
+
         projectileTimerCounter = 0f;
 
         if (SoundEffectsManager.Instance != null)
         {
             SoundEffectsManager.Instance
                 .PlayProjectileSound();
+        }
+    }
+
+    private void ClearPendingProjectileInput()
+    {
+        projectileInputPending = false;
+        projectileInputStartTime = 0f;
+
+        lastUpPressTime =
+            float.NegativeInfinity;
+
+        lastDownPressTime =
+            float.NegativeInfinity;
+
+        lastLeftPressTime =
+            float.NegativeInfinity;
+
+        lastRightPressTime =
+            float.NegativeInfinity;
+    }
+
+    private void IgnorePlayerCollisions(
+        GameObject projectileObject)
+    {
+        Collider2D[] projectileColliders =
+            projectileObject
+                .GetComponentsInChildren<Collider2D>();
+
+        foreach (
+            Collider2D playerCollider
+            in playerColliders)
+        {
+            if (playerCollider == null)
+            {
+                continue;
+            }
+
+            foreach (
+                Collider2D projectileCollider
+                in projectileColliders)
+            {
+                if (projectileCollider == null)
+                {
+                    continue;
+                }
+
+                Physics2D.IgnoreCollision(
+                    playerCollider,
+                    projectileCollider
+                );
+            }
         }
     }
 }

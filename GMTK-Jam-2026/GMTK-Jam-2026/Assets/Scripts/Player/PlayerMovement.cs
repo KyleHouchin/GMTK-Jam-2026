@@ -14,11 +14,14 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Dash Mechanics")]
     [SerializeField] private float dashCooldown = 3f;
-    [SerializeField] private float dashDuration = 0.15f;
-    [SerializeField] private float dashFactor = 5f;
+    [SerializeField] private float dashDuration = 0.12f;
+    [SerializeField] private float dashFactor = 2.25f;
 
     [Header("Glide Mechanics")]
     [SerializeField] private float glideVelocity = -1.5f;
+
+    [SerializeField, Min(0.01f)]
+    private float glideGroundStopDistance = 0.4f;
 
     [Header("Jumping")]
     [SerializeField] private float jumpForce = 12f;
@@ -51,6 +54,7 @@ public class PlayerMovement : MonoBehaviour
     private float jumpBufferCounter;
     private float dashCooldownCounter;
     private float baseGravityScale;
+    private float dashDirection;
 
     private bool isGrounded;
     private bool jumpReleased;
@@ -59,6 +63,7 @@ public class PlayerMovement : MonoBehaviour
     private bool hasAirDash;
     private bool facingRight = true;
 
+    private Coroutine dashRoutine;
     private Coroutine glideRoutine;
 
     private void Awake()
@@ -108,7 +113,10 @@ public class PlayerMovement : MonoBehaviour
             jumpAction.action.Disable();
         }
 
+        EndDash();
         EndGlide();
+
+        horizontalInput = 0f;
     }
 
     private void Update()
@@ -165,6 +173,24 @@ public class PlayerMovement : MonoBehaviour
                 EndGlide();
             }
         }
+    }
+
+    private bool IsNearGround()
+    {
+        if (groundCheck == null)
+        {
+            return false;
+        }
+
+        RaycastHit2D groundHit =
+            Physics2D.Raycast(
+                groundCheck.position,
+                Vector2.down,
+                glideGroundStopDistance,
+                groundLayer
+            );
+
+        return groundHit.collider != null;
     }
 
     private void UpdateAnimation()
@@ -268,7 +294,7 @@ public class PlayerMovement : MonoBehaviour
             newHorizontalSpeed =
                 maximumMoveSpeed *
                 dashFactor *
-                horizontalInput *
+                dashDirection *
                 externalSpeedMultiplier;
         }
 
@@ -334,7 +360,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateDashCooldownCounter()
     {
-        dashCooldownCounter += Time.deltaTime;
+        if (!isDashing)
+        {
+            dashCooldownCounter += Time.deltaTime;
+        }
     }
 
     private void OnJumpPerformed(
@@ -367,7 +396,7 @@ public class PlayerMovement : MonoBehaviour
     public void SetDash()
     {
         if (isDashing ||
-            dashCooldownCounter <= dashCooldown)
+            dashCooldownCounter < dashCooldown)
         {
             return;
         }
@@ -384,6 +413,17 @@ public class PlayerMovement : MonoBehaviour
 
         EndGlide();
 
+        if (Mathf.Abs(horizontalInput) > 0.01f)
+        {
+            dashDirection =
+                Mathf.Sign(horizontalInput);
+        }
+        else
+        {
+            dashDirection =
+                facingRight ? 1f : -1f;
+        }
+
         isDashing = true;
 
         if (SoundEffectsManager.Instance != null)
@@ -392,7 +432,12 @@ public class PlayerMovement : MonoBehaviour
                 .PlayDashSound();
         }
 
-        StartCoroutine(
+        if (dashRoutine != null)
+        {
+            StopCoroutine(dashRoutine);
+        }
+
+        dashRoutine = StartCoroutine(
             DashCounter()
         );
     }
@@ -403,21 +448,42 @@ public class PlayerMovement : MonoBehaviour
             dashDuration
         );
 
+        dashRoutine = null;
+        EndDash();
+    }
+
+    private void EndDash()
+    {
+        if (dashRoutine != null)
+        {
+            StopCoroutine(dashRoutine);
+            dashRoutine = null;
+        }
+
+        if (!isDashing)
+        {
+            return;
+        }
+
         isDashing = false;
         dashCooldownCounter = 0f;
 
-        playerRigidbody.linearVelocity =
-            new Vector2(
-                maximumMoveSpeed *
-                horizontalInput *
-                externalSpeedMultiplier,
-                playerRigidbody.linearVelocity.y
-            );
+        if (playerRigidbody != null)
+        {
+            playerRigidbody.linearVelocity =
+                new Vector2(
+                    maximumMoveSpeed *
+                    horizontalInput *
+                    externalSpeedMultiplier,
+                    playerRigidbody.linearVelocity.y
+                );
+        }
     }
 
     public void StartGlide()
     {
         if (isGrounded ||
+            IsNearGround() ||
             isGliding ||
             !IsMovingDown())
         {
@@ -433,6 +499,11 @@ public class PlayerMovement : MonoBehaviour
         {
             SoundEffectsManager.Instance
                 .StartGlideSound();
+        }
+
+        if (glideRoutine != null)
+        {
+            StopCoroutine(glideRoutine);
         }
 
         glideRoutine = StartCoroutine(
@@ -453,6 +524,7 @@ public class PlayerMovement : MonoBehaviour
     private IEnumerator GlideCounter()
     {
         while (!isGrounded &&
+               !IsNearGround() &&
                IsMovingDown() &&
                Keyboard.current != null &&
                Keyboard.current.spaceKey.isPressed)
@@ -505,6 +577,12 @@ public class PlayerMovement : MonoBehaviour
         Gizmos.DrawWireSphere(
             groundCheck.position,
             groundCheckRadius
+        );
+
+        Gizmos.DrawLine(
+            groundCheck.position,
+            groundCheck.position +
+            Vector3.down * glideGroundStopDistance
         );
     }
 }
