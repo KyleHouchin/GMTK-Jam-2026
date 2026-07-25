@@ -15,7 +15,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Dash Mechanics")]
     [SerializeField] private float dashCooldown = 3f;
     [SerializeField] private float dashDuration = 0.15f;
-    [SerializeField] private float dashFactor = 5;
+    [SerializeField] private float dashFactor = 5f;
 
     [Header("Glide Mechanics")]
     [SerializeField] private float glideVelocity = -1.5f;
@@ -37,8 +37,12 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Animation")]
     [SerializeField] private Animator anim;
-    private bool facingRight = true;
 
+    [Header("Runtime Speed Modifier")]
+    [SerializeField] private float externalSpeedMultiplier = 1f;
+
+    public float ExternalSpeedMultiplier =>
+        externalSpeedMultiplier;
 
     private Rigidbody2D playerRigidbody;
 
@@ -52,11 +56,16 @@ public class PlayerMovement : MonoBehaviour
     private bool jumpReleased;
     private bool isDashing;
     private bool hasAirDash;
+    private bool facingRight = true;
 
     private void Awake()
     {
         playerRigidbody = GetComponent<Rigidbody2D>();
-        baseGravityScale = playerRigidbody.gravityScale;
+
+        baseGravityScale =
+            playerRigidbody.gravityScale;
+
+        ResetExternalSpeedMultiplier();
     }
 
     private void OnEnable()
@@ -69,8 +78,12 @@ public class PlayerMovement : MonoBehaviour
         if (jumpAction != null)
         {
             jumpAction.action.Enable();
-            jumpAction.action.performed += OnJumpPerformed;
-            jumpAction.action.canceled += OnJumpCanceled;
+
+            jumpAction.action.performed +=
+                OnJumpPerformed;
+
+            jumpAction.action.canceled +=
+                OnJumpCanceled;
         }
     }
 
@@ -83,8 +96,12 @@ public class PlayerMovement : MonoBehaviour
 
         if (jumpAction != null)
         {
-            jumpAction.action.performed -= OnJumpPerformed;
-            jumpAction.action.canceled -= OnJumpCanceled;
+            jumpAction.action.performed -=
+                OnJumpPerformed;
+
+            jumpAction.action.canceled -=
+                OnJumpCanceled;
+
             jumpAction.action.Disable();
         }
     }
@@ -114,7 +131,9 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        Vector2 moveInput = moveAction.action.ReadValue<Vector2>();
+        Vector2 moveInput =
+            moveAction.action.ReadValue<Vector2>();
+
         horizontalInput = moveInput.x;
     }
 
@@ -131,7 +150,8 @@ public class PlayerMovement : MonoBehaviour
             groundCheckRadius,
             groundLayer
         );
-        if(isGrounded)
+
+        if (isGrounded)
         {
             hasAirDash = true;
         }
@@ -139,11 +159,28 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateAnimation()
     {
-        anim.SetFloat("horizontal", Mathf.Abs(playerRigidbody.linearVelocity.x));
-        anim.SetFloat("vertical", playerRigidbody.linearVelocity.y);
+        if (anim != null)
+        {
+            anim.SetFloat(
+                "horizontal",
+                Mathf.Abs(
+                    playerRigidbody.linearVelocity.x
+                )
+            );
 
-        if ( (facingRight && horizontalInput < 0) ||
-             (!facingRight && horizontalInput > 0) )
+            anim.SetFloat(
+                "vertical",
+                playerRigidbody.linearVelocity.y
+            );
+        }
+
+        bool shouldFaceLeft =
+            facingRight && horizontalInput < 0f;
+
+        bool shouldFaceRight =
+            !facingRight && horizontalInput > 0f;
+
+        if (shouldFaceLeft || shouldFaceRight)
         {
             FlipFacingDirection();
         }
@@ -151,7 +188,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void FlipFacingDirection()
     {
-        transform.Rotate(0, 180, 0);
+        transform.Rotate(0f, 180f, 0f);
         facingRight = !facingRight;
     }
 
@@ -177,62 +214,80 @@ public class PlayerMovement : MonoBehaviour
 
     private void ApplyHorizontalMovement()
     {
-        float newHorizontalSpeed = 0;
-        if(!isDashing)
-        {
-            float targetSpeed = horizontalInput * maximumMoveSpeed;
-            float currentSpeed = playerRigidbody.linearVelocity.x;
+        float newHorizontalSpeed;
 
-            bool playerIsTryingToMove = Mathf.Abs(horizontalInput) > 0.01f;
+        if (!isDashing)
+        {
+            float targetSpeed =
+                horizontalInput *
+                maximumMoveSpeed *
+                externalSpeedMultiplier;
+
+            float currentSpeed =
+                playerRigidbody.linearVelocity.x;
+
+            bool playerIsTryingToMove =
+                Mathf.Abs(horizontalInput) > 0.01f;
 
             float speedChangeRate;
 
             if (isGrounded)
             {
-                speedChangeRate = playerIsTryingToMove
-                    ? groundAcceleration
-                    : groundDeceleration;
+                speedChangeRate =
+                    playerIsTryingToMove
+                        ? groundAcceleration
+                        : groundDeceleration;
             }
             else
             {
-                speedChangeRate = playerIsTryingToMove
-                    ? airAcceleration
-                    : airDeceleration;
+                speedChangeRate =
+                    playerIsTryingToMove
+                        ? airAcceleration
+                        : airDeceleration;
             }
+
             newHorizontalSpeed = Mathf.MoveTowards(
                 currentSpeed,
                 targetSpeed,
-                speedChangeRate * Time.fixedDeltaTime
+                speedChangeRate *
+                Time.fixedDeltaTime
             );
         }
         else
         {
-            newHorizontalSpeed = maximumMoveSpeed * dashFactor * horizontalInput;
+            newHorizontalSpeed =
+                maximumMoveSpeed *
+                dashFactor *
+                horizontalInput *
+                externalSpeedMultiplier;
         }
-        
 
-        
-
-        playerRigidbody.linearVelocity = new Vector2(
-            newHorizontalSpeed,
-            playerRigidbody.linearVelocity.y
-        );
+        playerRigidbody.linearVelocity =
+            new Vector2(
+                newHorizontalSpeed,
+                playerRigidbody.linearVelocity.y
+            );
     }
 
     private void TryToJump()
     {
-        bool canUseCoyoteTime = coyoteTimeCounter > 0f;
-        bool hasBufferedJump = jumpBufferCounter > 0f;
+        bool canUseCoyoteTime =
+            coyoteTimeCounter > 0f;
 
-        if (!canUseCoyoteTime || !hasBufferedJump)
+        bool hasBufferedJump =
+            jumpBufferCounter > 0f;
+
+        if (!canUseCoyoteTime ||
+            !hasBufferedJump)
         {
             return;
         }
 
-        playerRigidbody.linearVelocity = new Vector2(
-            playerRigidbody.linearVelocity.x,
-            jumpForce
-        );
+        playerRigidbody.linearVelocity =
+            new Vector2(
+                playerRigidbody.linearVelocity.x,
+                jumpForce
+            );
 
         coyoteTimeCounter = 0f;
         jumpBufferCounter = 0f;
@@ -248,10 +303,12 @@ public class PlayerMovement : MonoBehaviour
 
         if (playerRigidbody.linearVelocity.y > 0f)
         {
-            playerRigidbody.linearVelocity = new Vector2(
-                playerRigidbody.linearVelocity.x,
-                playerRigidbody.linearVelocity.y * jumpCutMultiplier
-            );
+            playerRigidbody.linearVelocity =
+                new Vector2(
+                    playerRigidbody.linearVelocity.x,
+                    playerRigidbody.linearVelocity.y *
+                    jumpCutMultiplier
+                );
         }
 
         jumpReleased = false;
@@ -262,15 +319,123 @@ public class PlayerMovement : MonoBehaviour
         dashCooldownCounter += Time.deltaTime;
     }
 
-    private void OnJumpPerformed(InputAction.CallbackContext context)
+    private void OnJumpPerformed(
+        InputAction.CallbackContext context)
     {
         jumpBufferCounter = jumpBufferTime;
         jumpReleased = false;
     }
 
-    private void OnJumpCanceled(InputAction.CallbackContext context)
+    private void OnJumpCanceled(
+        InputAction.CallbackContext context)
     {
         jumpReleased = true;
+    }
+
+    public void SetExternalSpeedMultiplier(
+        float multiplier)
+    {
+        externalSpeedMultiplier = Mathf.Max(
+            0f,
+            multiplier
+        );
+    }
+
+    public void ResetExternalSpeedMultiplier()
+    {
+        externalSpeedMultiplier = 1f;
+    }
+
+    public void SetDash()
+    {
+        if (isDashing ||
+            dashCooldownCounter <= dashCooldown)
+        {
+            return;
+        }
+
+        if (!isGrounded)
+        {
+            if (!hasAirDash)
+            {
+                return;
+            }
+
+            hasAirDash = false;
+        }
+
+        isDashing = true;
+
+        StartCoroutine(
+            DashCounter()
+        );
+    }
+
+    private IEnumerator DashCounter()
+    {
+        yield return new WaitForSeconds(
+            dashDuration
+        );
+
+        isDashing = false;
+        dashCooldownCounter = 0f;
+
+        playerRigidbody.linearVelocity =
+            new Vector2(
+                maximumMoveSpeed *
+                horizontalInput *
+                externalSpeedMultiplier,
+                playerRigidbody.linearVelocity.y
+            );
+    }
+
+    public void StartGlide()
+    {
+        if (isGrounded)
+        {
+            return;
+        }
+
+        playerRigidbody.gravityScale = 0f;
+
+        float previousYVelocity =
+            playerRigidbody.linearVelocityY;
+
+        playerRigidbody.linearVelocityY =
+            glideVelocity;
+
+        StartCoroutine(
+            GlideCounter(previousYVelocity)
+        );
+    }
+
+    public bool IsGrounded()
+    {
+        return isGrounded;
+    }
+
+    public bool IsMovingDown()
+    {
+        return playerRigidbody.linearVelocityY < 0f;
+    }
+
+    private IEnumerator GlideCounter(
+        float previousYVelocity)
+    {
+        while (
+            !isGrounded &&
+            IsMovingDown() &&
+            Keyboard.current != null &&
+            Keyboard.current.spaceKey.isPressed)
+        {
+            yield return null;
+        }
+
+        playerRigidbody.gravityScale =
+            baseGravityScale;
+
+        playerRigidbody.linearVelocityY =
+            previousYVelocity;
     }
 
     private void OnDrawGizmosSelected()
@@ -284,64 +449,5 @@ public class PlayerMovement : MonoBehaviour
             groundCheck.position,
             groundCheckRadius
         );
-    }
-
-    public void SetDash()
-    {
-        if(!isDashing && dashCooldownCounter > dashCooldown) {    //Player is not currently dashing
-            if(!isGrounded)
-            {
-                if(!hasAirDash)
-                {
-                    return; //This handles the case where the player is in the air but has already dashed once
-                }
-                else
-                {
-                    hasAirDash = false;
-                }
-            }
-            isDashing = true;
-            StartCoroutine(DashCounter());
-        }
-    }
-
-    private IEnumerator DashCounter()
-    {
-        yield return new WaitForSeconds(dashDuration);
-        isDashing = false;
-        dashCooldownCounter = 0;
-        playerRigidbody.linearVelocity = new Vector2(maximumMoveSpeed * horizontalInput, playerRigidbody.linearVelocity.y);
-    }
-
-    public void StartGlide()
-    {
-        if(!isGrounded)
-        {
-            //Turn off gravity, set vertical velocity to slow set value
-            playerRigidbody.gravityScale = 0;
-            float prevYVelocity = playerRigidbody.linearVelocityY;
-            playerRigidbody.linearVelocityY = glideVelocity;
-            StartCoroutine(GlideCounter(prevYVelocity));
-        }
-    }
-
-    public bool IsGrounded()
-    {
-        return isGrounded;
-    }
-
-    public bool IsMovingDown()
-    {
-        return playerRigidbody.linearVelocityY < 0;
-    }
-
-    private IEnumerator GlideCounter(float prevYVelocity)
-    {
-        while(!isGrounded && IsMovingDown() && Keyboard.current.spaceKey.isPressed)
-        {
-            yield return null;
-        }
-        playerRigidbody.gravityScale = baseGravityScale;
-        playerRigidbody.linearVelocityY = prevYVelocity;        
     }
 }
