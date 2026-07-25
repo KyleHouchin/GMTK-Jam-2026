@@ -51,6 +51,7 @@ public class PlayerMovement : MonoBehaviour
     private float wallJumpingCounter;
     [SerializeField] private float wallJumpingDuration = 0.4f;
     [SerializeField] private Vector2 wallJumpingPower = new Vector2(8f, 16f);
+    private bool wallJumpQueued;
 
 
     private Rigidbody2D playerRigidbody;
@@ -119,6 +120,7 @@ public class PlayerMovement : MonoBehaviour
         TryToJump();
         ApplyVariableJumpHeight();
         WallSlide();
+        ExecuteWallJump();
     }
 
     private void ReadMovementInput()
@@ -157,8 +159,8 @@ public class PlayerMovement : MonoBehaviour
         anim.SetFloat("horizontal", Mathf.Abs(playerRigidbody.linearVelocity.x));
         anim.SetFloat("vertical", playerRigidbody.linearVelocity.y);
 
-        if ( (facingRight && horizontalInput < 0) ||
-             (!facingRight && horizontalInput > 0) 
+        if ( ( (facingRight && horizontalInput < 0) ||
+             (!facingRight && horizontalInput > 0) )
              && !isWallJumping)
         {
             FlipFacingDirection();
@@ -364,7 +366,7 @@ public class PlayerMovement : MonoBehaviour
 
     private bool IsWalled()
     {
-        return Physics2D.OverlapCircle(wallCheck.position, 0.2f, groundLayer);
+        return Physics2D.OverlapCircle(wallCheck.position, 0.2f, wallLayer);
     }
     private void WallSlide()
     {
@@ -380,7 +382,6 @@ public class PlayerMovement : MonoBehaviour
     }
     private void WallJump()
     {
-        Debug.Log(wallJumpingCounter > 0f);
         //This if-else allows for a wall jump to occur for a brief period of time even after the player stops wall sliding
         if(isWallSliding)
         {
@@ -398,8 +399,7 @@ public class PlayerMovement : MonoBehaviour
         {
             Debug.Log("Detected a wall jump");
             isWallJumping = true;
-            playerRigidbody.linearVelocity = new Vector2(wallJumpingDirection * wallJumpingPower.x, wallJumpingPower.y);
-            Debug.Log("Velocity: " + playerRigidbody.linearVelocity);
+            wallJumpQueued = true;
             wallJumpingCounter = 0f;
 
             //Flip direction of player if facing the wrong way
@@ -408,6 +408,15 @@ public class PlayerMovement : MonoBehaviour
                 FlipFacingDirection();
             }
             Invoke(nameof(StopWallJumping), wallJumpingDuration);
+        }
+    }
+
+    private void ExecuteWallJump()
+    {
+        if(wallJumpQueued)
+        {
+            playerRigidbody.linearVelocity += new Vector2(wallJumpingDirection * wallJumpingPower.x, wallJumpingPower.y);
+            wallJumpQueued = false;
         }
     }
 
