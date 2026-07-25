@@ -1743,8 +1743,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   projectilePrefab: {fileID: 8308716528790473782, guid: 6651f23d16b05c244883e2b7d696b51b, type: 3}
   projectileSpawnDistance: 0.75
-  projectileTimer: 1
-  diagonalInputWindow: 0.08
+  projectileTimer: 0.5
+  diagonalInputWindow: 0.04
 --- !u!114 &685316654
 MonoBehaviour:
   m_ObjectHideFlags: 0
