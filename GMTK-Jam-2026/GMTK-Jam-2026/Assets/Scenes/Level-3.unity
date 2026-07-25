@@ -655,7 +655,7 @@ MonoBehaviour:
   playerAbility: {fileID: 0}
   playerLoadout: {fileID: 685316661}
   playerRigidbody: {fileID: 685316655}
-  currentLevelNumber: 1
+  currentLevelNumber: 3
   titleSceneName: TitleScreen
   runHasStarted: 0
   gameIsOver: 0
@@ -5705,7 +5705,7 @@ TilemapCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_CompositeOperation: 1
   m_CompositeOrder: 0

@@ -65,9 +65,19 @@ public class PlayerMovement : MonoBehaviour
     private bool hasAirDash;
     private bool facingRight = true;
 
-    // These store references to the currently running Dash and Glide coroutines.
-    // Keeping the references lets us safely stop them when gameplay is disabled
-    // or when another action interrupts the ability.
+    /*
+     * A Coroutine lets Unity run a method over multiple frames.
+     *
+     * Normal methods run from beginning to end immediately.
+     * Coroutine methods can pause at a "yield return" statement
+     * and continue later.
+     *
+     * These variables store references to the currently running
+     * Dash and Glide coroutines.
+     *
+     * Keeping these references allows us to stop the correct
+     * coroutine if the ability is interrupted.
+     */
     private Coroutine dashRoutine;
     private Coroutine glideRoutine;
 
@@ -108,6 +118,13 @@ public class PlayerMovement : MonoBehaviour
             jumpAction.action.Disable();
         }
 
+        /*
+         * The script can be disabled when the player wins,
+         * loses, or returns to the shop.
+         *
+         * EndDash() and EndGlide() stop their active coroutines
+         * and restore the player to a normal state.
+         */
         EndDash();
         EndGlide();
 
@@ -165,6 +182,12 @@ public class PlayerMovement : MonoBehaviour
 
             if (isGliding)
             {
+                /*
+                 * Landing interrupts Glide.
+                 *
+                 * EndGlide() stops GlideCounter(),
+                 * restores gravity, and stops the Glide sound.
+                 */
                 EndGlide();
             }
         }
@@ -329,6 +352,12 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
+            /*
+             * While isDashing is true, normal movement is replaced
+             * with the saved Dash direction and increased speed.
+             *
+             * DashCounter() controls how long isDashing stays true.
+             */
             newHorizontalSpeed =
                 maximumMoveSpeed *
                 dashFactor *
@@ -352,6 +381,7 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
+        // Jumping interrupts Glide before applying the jump.
         EndGlide();
 
         playerRigidbody.linearVelocity = new Vector2(
@@ -418,14 +448,18 @@ public class PlayerMovement : MonoBehaviour
 
     public void SetDash()
     {
-        // Do not begin another Dash while one is active or while Dash is cooling down.
+        // Do not begin another Dash while one is active or cooling down.
         if (isDashing || dashCooldownCounter < dashCooldown)
         {
             return;
         }
 
-        // The player gets one Dash while airborne.
-        // Landing restores hasAirDash inside CheckIfGrounded().
+        /*
+         * The player receives one Dash while airborne.
+         *
+         * Landing sets hasAirDash back to true inside
+         * CheckIfGrounded().
+         */
         if (!isGrounded)
         {
             if (!hasAirDash)
@@ -436,11 +470,21 @@ public class PlayerMovement : MonoBehaviour
             hasAirDash = false;
         }
 
-        // Dashing interrupts Glide and restores normal gravity first.
+        /*
+         * Dashing interrupts Glide.
+         *
+         * EndGlide() stops the Glide coroutine,
+         * restores normal gravity, and stops its sound.
+         */
         EndGlide();
 
-        // Save the Dash direction when the Dash begins.
-        // This prevents changing or canceling the Dash by changing input midway through it.
+        /*
+         * Save the direction when Dash begins.
+         *
+         * We do not use the live horizontal input during Dash,
+         * because changing input midway through the Dash should
+         * not reverse or cancel it.
+         */
         if (Mathf.Abs(horizontalInput) > 0.01f)
         {
             dashDirection = Mathf.Sign(horizontalInput);
@@ -461,48 +505,99 @@ public class PlayerMovement : MonoBehaviour
             SoundEffectsManager.Instance.PlayDashSound();
         }
 
-        // This should normally be null because another Dash cannot start while isDashing is true.
-        // The check still prevents an old coroutine from remaining active unexpectedly.
+        /*
+         * This should normally be null because the conditions
+         * above prevent starting another Dash while one is active.
+         *
+         * This safety check stops an older Dash coroutine if one
+         * somehow still exists.
+         */
         if (dashRoutine != null)
         {
             StopCoroutine(dashRoutine);
         }
 
+        /*
+         * StartCoroutine begins DashCounter().
+         *
+         * DashCounter does not complete immediately. It pauses
+         * for dashDuration, then finishes the Dash.
+         *
+         * We save the returned Coroutine reference so it can be
+         * stopped early if PlayerMovement becomes disabled.
+         */
         dashRoutine = StartCoroutine(DashCounter());
     }
 
     private IEnumerator DashCounter()
     {
-        // Keep Dash active for the configured Dash duration.
+        /*
+         * WaitForSeconds pauses this coroutine without freezing
+         * the entire game.
+         *
+         * Other Update and FixedUpdate methods continue running.
+         * During this wait, isDashing remains true, so
+         * ApplyHorizontalMovement continues applying Dash speed.
+         */
         yield return new WaitForSeconds(dashDuration);
 
-        // Clear the coroutine reference before calling EndDash().
-        // EndDash() will finish the ability without attempting to stop this completed coroutine.
+        /*
+         * Reaching this line means the wait completed normally.
+         *
+         * Clear the reference first so EndDash() knows there is
+         * no longer a running coroutine that needs to be stopped.
+         */
         dashRoutine = null;
+
+        // Finish the Dash and return to normal movement.
         EndDash();
     }
 
     private void EndDash()
     {
-        // EndDash() can also be called early when PlayerMovement is disabled.
-        // If the Dash coroutine is still running, stop and clear it.
+        /*
+         * EndDash can be called in two ways:
+         *
+         * 1. Normally, after DashCounter finishes waiting.
+         * 2. Early, when the script is disabled or Dash is interrupted.
+         *
+         * If the coroutine is still active, stop it so it cannot
+         * continue later and call EndDash a second time.
+         */
         if (dashRoutine != null)
         {
             StopCoroutine(dashRoutine);
             dashRoutine = null;
         }
 
+        /*
+         * If Dash already ended, there is nothing else to reset.
+         *
+         * This protects the method from being called more than once.
+         */
         if (!isDashing)
         {
             return;
         }
 
         isDashing = false;
+
+        /*
+         * Reset the cooldown timer.
+         *
+         * UpdateDashCooldownCounter() will begin increasing it
+         * again now that isDashing is false.
+         */
         dashCooldownCounter = 0f;
 
         if (playerRigidbody != null)
         {
-            // Return to normal movement speed after the Dash ends.
+            /*
+             * Dash uses a much higher horizontal speed.
+             *
+             * When it ends, return the player to normal movement
+             * speed based on their current horizontal input.
+             */
             playerRigidbody.linearVelocity = new Vector2(
                 maximumMoveSpeed * horizontalInput * externalSpeedMultiplier,
                 playerRigidbody.linearVelocity.y
@@ -512,7 +607,14 @@ public class PlayerMovement : MonoBehaviour
 
     public void StartGlide()
     {
-        // Glide can only begin while falling and far enough above the ground.
+        /*
+         * Glide can only begin when:
+         *
+         * - The player is not grounded.
+         * - The player is not near the ground cutoff.
+         * - Glide is not already active.
+         * - The player is moving downward.
+         */
         if (isGrounded ||
             isTooCloseToGroundToGlide ||
             isGliding ||
@@ -521,6 +623,15 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
+        /*
+         * Mark Glide as active.
+         *
+         * Gravity is temporarily disabled so the Rigidbody does
+         * not continue accelerating downward.
+         *
+         * The player's vertical speed is then held at the slower
+         * configured glideVelocity.
+         */
         isGliding = true;
         playerRigidbody.gravityScale = 0f;
         playerRigidbody.linearVelocityY = glideVelocity;
@@ -530,12 +641,23 @@ public class PlayerMovement : MonoBehaviour
             SoundEffectsManager.Instance.StartGlideSound();
         }
 
-        // Prevent multiple Glide coroutines from controlling gravity and velocity at once.
+        /*
+         * Only one GlideCounter coroutine should ever control
+         * the player's gravity and vertical velocity.
+         *
+         * Stop an older one before starting a new one.
+         */
         if (glideRoutine != null)
         {
             StopCoroutine(glideRoutine);
         }
 
+        /*
+         * Start GlideCounter and save its reference.
+         *
+         * Unlike DashCounter, which waits for a fixed duration,
+         * GlideCounter keeps checking its conditions every frame.
+         */
         glideRoutine = StartCoroutine(GlideCounter());
     }
 
@@ -551,33 +673,85 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator GlideCounter()
     {
-        // Keep Glide active while the player is falling, holding Space,
-        // and has not reached the configured ground cutoff distance.
+        /*
+         * This while loop represents the conditions required
+         * for Glide to remain active.
+         *
+         * Glide continues while:
+         *
+         * - The player has not landed.
+         * - The player is not too close to the ground.
+         * - The player is still moving downward.
+         * - A keyboard exists.
+         * - The player is still holding Space.
+         */
         while (!isGrounded &&
                !isTooCloseToGroundToGlide &&
                IsMovingDown() &&
                Keyboard.current != null &&
                Keyboard.current.spaceKey.isPressed)
         {
+            /*
+             * Keep the downward speed at the configured Glide speed.
+             *
+             * Without this line, another physics interaction could
+             * change the player's vertical velocity during Glide.
+             */
             playerRigidbody.linearVelocityY = glideVelocity;
+
+            /*
+             * "yield return null" pauses this coroutine until the
+             * next frame.
+             *
+             * On the next frame, Unity returns here and checks the
+             * while-loop conditions again.
+             *
+             * This is what allows Glide to remain active over time
+             * without freezing the game.
+             */
             yield return null;
         }
 
-        // Clear the reference first because this coroutine has finished naturally.
+        /*
+         * Reaching this point means at least one Glide condition
+         * became false.
+         *
+         * Examples:
+         * - Space was released.
+         * - The player landed.
+         * - The player reached the ground cutoff.
+         * - The player stopped moving downward.
+         */
+
+        /*
+         * This coroutine has finished naturally, so clear its
+         * reference before calling EndGlide().
+         */
         glideRoutine = null;
+
+        // Restore normal player physics and stop the Glide sound.
         EndGlide();
     }
 
     private void EndGlide()
     {
-        // EndGlide() may also be called by landing, jumping, dashing,
-        // reaching the ground cutoff, or disabling PlayerMovement.
+        /*
+         * EndGlide can be called normally by GlideCounter, or early
+         * because the player landed, jumped, dashed, won, or lost.
+         *
+         * Stop the active coroutine if it has not finished naturally.
+         */
         if (glideRoutine != null)
         {
             StopCoroutine(glideRoutine);
             glideRoutine = null;
         }
 
+        /*
+         * If Glide already ended, there is nothing else to reset.
+         *
+         * This prevents gravity and audio from being reset repeatedly.
+         */
         if (!isGliding)
         {
             return;
@@ -585,11 +759,18 @@ public class PlayerMovement : MonoBehaviour
 
         isGliding = false;
 
+        /*
+         * Restore the Rigidbody's normal gravity value that was
+         * saved in Awake().
+         */
         if (playerRigidbody != null)
         {
             playerRigidbody.gravityScale = baseGravityScale;
         }
 
+        /*
+         * Stop the looping Glide sound when the ability ends.
+         */
         if (SoundEffectsManager.Instance != null)
         {
             SoundEffectsManager.Instance.StopGlideSound();

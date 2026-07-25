@@ -31,6 +31,10 @@ public class RunManager : MonoBehaviour
     [SerializeField] private PlayerLoadout playerLoadout;
     [SerializeField] private Rigidbody2D playerRigidbody;
 
+    [Header("Level Progression")]
+    [SerializeField, Min(1)]
+    private int currentLevelNumber = 1;
+
     [Header("Scene Names")]
     [SerializeField]
     private string titleSceneName =
@@ -189,6 +193,10 @@ public class RunManager : MonoBehaviour
         runHasStarted = false;
         gameIsOver = false;
         runWasCompleted = true;
+
+        LevelProgressManager.CompleteLevel(
+            currentLevelNumber
+        );
 
         if (lifeForceTimer != null)
         {

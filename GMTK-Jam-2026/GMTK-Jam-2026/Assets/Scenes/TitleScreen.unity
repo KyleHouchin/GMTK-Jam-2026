@@ -3110,8 +3110,15 @@ MonoBehaviour:
   quitButton: {fileID: 666524183}
   optionsBackButton: {fileID: 715156033}
   levelOneButton: {fileID: 1379104338}
+  levelTwoButton: {fileID: 924458355}
+  levelThreeButton: {fileID: 1819960850}
   levelSelectBackButton: {fileID: 1304747086}
+  levelOneButtonText: {fileID: 1833320440}
+  levelTwoButtonText: {fileID: 1549251639}
+  levelThreeButtonText: {fileID: 1582340809}
   levelOneSceneName: Level-1
+  levelTwoSceneName: Level-2
+  levelThreeSceneName: Level-3
 --- !u!4 &1377333038
 Transform:
   m_ObjectHideFlags: 0
