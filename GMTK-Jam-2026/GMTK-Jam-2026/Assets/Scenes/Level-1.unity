@@ -157,10 +157,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '<b>WINGED LEAP</b>
+  m_text: '<b>DRACULA GLIDE</b>
 
 
-    Jump a second time while airborne
+    Glide through the air and descend more slowly
 
 
     COST:
@@ -537,6 +537,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 78936921}
   m_CullTransparentMesh: 1
+--- !u!1001 &191151176
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3973132080627764969, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
+      propertyPath: m_Name
+      value: MusicManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4978979012589377184, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 572c410197dee8d4ab473c97b478f65b, type: 3}
 --- !u!1 &230658153
 GameObject:
   m_ObjectHideFlags: 0
@@ -595,10 +652,10 @@ MonoBehaviour:
   victoryRetryButton: {fileID: 921057323}
   levelSelectButton: {fileID: 1979289945}
   playerMovement: {fileID: 685316654}
+  playerAbility: {fileID: 0}
   playerLoadout: {fileID: 685316661}
   playerRigidbody: {fileID: 685316655}
   titleSceneName: TitleScreen
-  levelSelectSceneName: LevelSelect
   runHasStarted: 0
   gameIsOver: 0
   runWasCompleted: 0
@@ -1684,7 +1741,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   projectilePrefab: {fileID: 8308716528790473782, guid: 6651f23d16b05c244883e2b7d696b51b, type: 3}
+  projectileSpawnDistance: 0.75
   projectileTimer: 1
+  diagonalInputWindow: 0.08
 --- !u!114 &685316654
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1706,6 +1765,7 @@ MonoBehaviour:
   dashDuration: 0.3
   dashFactor: 7
   glideVelocity: -1.5
+  glideGroundStopDistance: 0.4
   jumpForce: 14
   jumpCutMultiplier: 0.4
   coyoteTime: 0.12
@@ -1718,6 +1778,7 @@ MonoBehaviour:
   moveAction: {fileID: 3108043124380445338, guid: 59af296d3ed22094782fbf6bded62677, type: 3}
   jumpAction: {fileID: 6113761538311035157, guid: 59af296d3ed22094782fbf6bded62677, type: 3}
   anim: {fileID: 685316659}
+  externalSpeedMultiplier: 1
 --- !u!50 &685316655
 Rigidbody2D:
   serializedVersion: 5
@@ -1894,7 +1955,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerLoadout
   startingLifeForce: 0
   hasBatRush: 0
-  hasWingedLeap: 0
+  hasGlide: 0
   hasBloodShot: 0
 --- !u!1 &710712173
 GameObject:
@@ -1930,9 +1991,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbilitySelectionButton
   abilityType: 1
   lifeForceCost: 3
-  abilityId: DoubleJump
-  displayName: WINGED LEAP
-  description: Jump a second time while airborne
+  abilityId: Glide
+  displayName: DRACULA GLIDE
+  description: Glide through the air and descend more slowly
   altarManager: {fileID: 1697164071}
   buttonLabel: {fileID: 20433276}
 --- !u!114 &710712175
@@ -3298,6 +3359,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 992973899}
   m_CullTransparentMesh: 1
+--- !u!1001 &1075462346
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 16916057500627571, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5370477283959102805, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
+      propertyPath: m_Name
+      value: SoundEffectsManager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 291b3b0ae05021b40b726ab84858f5dd, type: 3}
 --- !u!1 &1078919382
 GameObject:
   m_ObjectHideFlags: 0
@@ -31468,3 +31586,5 @@ SceneRoots:
   - {fileID: 230658156}
   - {fileID: 685316658}
   - {fileID: 403280082}
+  - {fileID: 191151176}
+  - {fileID: 1075462346}

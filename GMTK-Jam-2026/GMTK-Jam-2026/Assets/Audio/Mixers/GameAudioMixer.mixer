@@ -39,6 +39,7 @@ AudioMixerController:
     - 15fba530da553214a93a15f62554621d
     - 32ea28f874db0114aa70fc019dbd9991
     - 24e945f0aa45ff243973f5d3f1e10cbd
+    - 065ed842cd7b7de4c8845b0cdac1337a
     name: View
   m_CurrentViewIndex: 0
   m_TargetSnapshot: {fileID: 24500006}
@@ -88,6 +89,7 @@ AudioMixerSnapshotController:
   m_SnapshotID: 2f8900a0d5f806848bf2c9200d99c324
   m_FloatValues:
     1e2f603dce4f4fb478d99979c0c6f1da: -1.0966386
+    819a9c8f2f4e82a45b1d7d6984eb1ad5: 5.46566
   m_TransitionOverrides: {}
 --- !u!243 &3996413065808916262
 AudioMixerGroupController:
@@ -98,7 +100,8 @@ AudioMixerGroupController:
   m_Name: SoundEffects
   m_AudioMixer: {fileID: 24100000}
   m_GroupID: 24e945f0aa45ff243973f5d3f1e10cbd
-  m_Children: []
+  m_Children:
+  - {fileID: 6955264889450328305}
   m_Volume: a862b7779222358428e2bc1eb5ef6948
   m_Pitch: 5ea00bda7b926974fba9ac26252228a3
   m_Send: 00000000000000000000000000000000
@@ -108,6 +111,20 @@ AudioMixerGroupController:
   m_Mute: 0
   m_Solo: 0
   m_BypassEffects: 0
+--- !u!244 &4951063207788101983
+AudioMixerEffectController:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_EffectID: 429c506a5aa0c2445845d9b926fe9c35
+  m_EffectName: Attenuation
+  m_MixLevel: c893648c578daf24faced8e82d04f9ae
+  m_Parameters: []
+  m_SendTarget: {fileID: 0}
+  m_EnableWetMix: 0
+  m_Bypass: 0
 --- !u!243 &5681010818081275844
 AudioMixerGroupController:
   m_ObjectHideFlags: 0
@@ -123,6 +140,25 @@ AudioMixerGroupController:
   m_Send: 00000000000000000000000000000000
   m_Effects:
   - {fileID: -2700454701445841603}
+  m_UserColorIndex: 0
+  m_Mute: 0
+  m_Solo: 0
+  m_BypassEffects: 0
+--- !u!243 &6955264889450328305
+AudioMixerGroupController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Glide
+  m_AudioMixer: {fileID: 24100000}
+  m_GroupID: 065ed842cd7b7de4c8845b0cdac1337a
+  m_Children: []
+  m_Volume: 819a9c8f2f4e82a45b1d7d6984eb1ad5
+  m_Pitch: 37ffe2f15e1785f4e9d940957f00c371
+  m_Send: 00000000000000000000000000000000
+  m_Effects:
+  - {fileID: 4951063207788101983}
   m_UserColorIndex: 0
   m_Mute: 0
   m_Solo: 0

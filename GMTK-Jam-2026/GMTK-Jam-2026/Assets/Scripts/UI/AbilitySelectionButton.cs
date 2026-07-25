@@ -37,25 +37,17 @@ public class AbilitySelectionButton : MonoBehaviour
 
     private void Awake()
     {
-        button = GetComponent<Button>();
-
-        if (buttonLabel == null)
-        {
-            buttonLabel = GetComponentInChildren<TMP_Text>();
-        }
-
-        DetectAbilityFromObjectName();
-        ApplyAbilityInformation();
+        CacheReferences();
+        ConfigureAbility();
         UpdateButtonLabel();
     }
 
     private void OnEnable()
     {
-        if (button == null)
-        {
-            button = GetComponent<Button>();
-        }
+        CacheReferences();
 
+        // Remove first so this listener can never be added twice.
+        button.onClick.RemoveListener(OnButtonClicked);
         button.onClick.AddListener(OnButtonClicked);
     }
 
@@ -73,25 +65,38 @@ public class AbilitySelectionButton : MonoBehaviour
         UpdateButtonLabel();
     }
 
+    private void CacheReferences()
+    {
+        if (button == null)
+        {
+            button = GetComponent<Button>();
+        }
+
+        if (buttonLabel == null)
+        {
+            buttonLabel = GetComponentInChildren<TMP_Text>(true);
+        }
+    }
+
     private void OnButtonClicked()
     {
         if (altarManager == null)
         {
-            Debug.LogWarning(
-                $"{name} does not have an altar manager assigned.",
-                this
-            );
-
             return;
         }
 
         altarManager.TryToggleAbility(this);
     }
 
+    private void ConfigureAbility()
+    {
+        DetectAbilityFromObjectName();
+        ApplyAbilityInformation();
+    }
+
     private void DetectAbilityFromObjectName()
     {
-        string objectName =
-            gameObject.name.ToLowerInvariant();
+        string objectName = gameObject.name.ToLowerInvariant();
 
         if (objectName.Contains("glide"))
         {
@@ -108,14 +113,7 @@ public class AbilitySelectionButton : MonoBehaviour
         if (objectName.Contains("dash"))
         {
             abilityType = AbilityType.BatRush;
-            return;
         }
-
-        Debug.LogWarning(
-            $"Could not automatically determine the ability for {gameObject.name}. " +
-            "Name it DashButton, GlideButton, or BloodButton.",
-            this
-        );
     }
 
     private void ApplyAbilityInformation()
@@ -149,9 +147,13 @@ public class AbilitySelectionButton : MonoBehaviour
             return;
         }
 
-        string selectedText = isSelected
-            ? "\n\n<color=#8B0000><b>SELECTED</b></color>"
-            : string.Empty;
+        string selectedText = string.Empty;
+
+        if (isSelected)
+        {
+            selectedText =
+                "\n\n<color=#8B0000><b>SELECTED</b></color>";
+        }
 
         buttonLabel.text =
             $"<b>{displayName}</b>\n\n" +
@@ -163,14 +165,8 @@ public class AbilitySelectionButton : MonoBehaviour
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        if (buttonLabel == null)
-        {
-            buttonLabel =
-                GetComponentInChildren<TMP_Text>();
-        }
-
-        DetectAbilityFromObjectName();
-        ApplyAbilityInformation();
+        CacheReferences();
+        ConfigureAbility();
         UpdateButtonLabel();
     }
 #endif
