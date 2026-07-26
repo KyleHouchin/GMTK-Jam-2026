@@ -1006,7 +1006,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 1, y: 2}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -1063,7 +1063,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: -2057572332, guid: e77d9d7153ef6814d97a48fbecec47f8, type: 3}
   m_Color: {r: 0.5583978, g: 0.1208188, b: 0.90188676, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -7262,7 +7262,7 @@ Transform:
   m_LocalScale: {x: 1.06, y: 1.06, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1802465059}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1615946737
 SpriteRenderer:
@@ -7510,7 +7510,7 @@ Transform:
   m_LocalScale: {x: 1.12, y: 1.12, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1802465059}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1625218084
 SpriteRenderer:
@@ -7899,10 +7899,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 8769997944094727438, guid: 3ec301e70bc3fcf48a81c12b5278167c, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 384583081178436870, guid: 3ec301e70bc3fcf48a81c12b5278167c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1615946736}
-    - targetCorrespondingSourceObject: {fileID: 8769997944094727438, guid: 3ec301e70bc3fcf48a81c12b5278167c, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 384583081178436870, guid: 3ec301e70bc3fcf48a81c12b5278167c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1625218083}
     m_AddedComponents: []
