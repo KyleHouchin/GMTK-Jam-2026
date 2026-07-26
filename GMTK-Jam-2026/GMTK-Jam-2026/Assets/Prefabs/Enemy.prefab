@@ -192,6 +192,9 @@ MonoBehaviour:
     m_Bits: 64
   enemySpeed: 10
   floorCheck: {fileID: 6656047893349589840}
+  projectileLayer:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!114 &7822049936937735942
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -9,9 +9,11 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float enemySpeed = 10f;
     [SerializeField] private Transform floorCheck;
+    [SerializeField] private LayerMask projectileLayer;
     private Rigidbody2D rigidbody;
     private Transform playerPosition;
     private bool isDashing;
+    private int numLives = 3;
 
     private enum EnemyStates
     {
@@ -89,7 +91,6 @@ public class EnemyController : MonoBehaviour
     private bool CheckForEdge()
     {
         var edgeCheck = Physics2D.Raycast(floorCheck.position, Vector2.down, 1.5f, groundLayer);
-        Debug.Log("Is there more ground? " + edgeCheck.collider != null);
         return edgeCheck.collider != null;
     }
 
@@ -130,4 +131,20 @@ public class EnemyController : MonoBehaviour
             }
         }
     }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        Debug.Log("Collision detected");
+        if ((projectileLayer & (1 << collision.gameObject.layer)) != 0)
+        {
+            Debug.Log("Collided with projectile");
+            numLives--;
+            Destroy(collision.gameObject);
+            if(numLives <= 0)
+            {
+                Destroy(this.gameObject);
+            }
+        }
+    }
+
 }
