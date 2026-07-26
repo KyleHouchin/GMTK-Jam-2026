@@ -24,6 +24,11 @@ public class SoundEffectsManager : MonoBehaviour
     [SerializeField] private AudioClip glideSound;
     [SerializeField] private AudioClip projectileSound;
 
+    [Header("World Sounds")]
+    [SerializeField] private AudioClip spikeDamageSound;
+    [SerializeField] private AudioClip pickupSound;
+    [SerializeField] private AudioClip boxDestructionSound;
+
     [Header("Game State Sounds")]
     [SerializeField] private AudioClip victorySound;
     [SerializeField] private AudioClip gameOverSound;
@@ -173,6 +178,21 @@ public class SoundEffectsManager : MonoBehaviour
     public void PlayProjectileSound()
     {
         PlayOneShot(projectileSound);
+    }
+
+    public void PlaySpikeDamageSound()
+    {
+        PlayOneShot(spikeDamageSound);
+    }
+
+    public void PlayPickupSound()
+    {
+        PlayOneShot(pickupSound);
+    }
+
+    public void PlayBoxDestructionSound()
+    {
+        PlayOneShot(boxDestructionSound);
     }
 
     public void PlayVictorySound()

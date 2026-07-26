@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: d565c4ca7940ec7449b4fe2e4f424fa7
+guid: 4a42b89cfe6cf3b4ab04c1cc44da576c
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5636326984309991781
-    second: twilight-castle-silhouette-stockcake_0
+      213: 8609715200539784413
+    second: castle-hills-1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: twilight-castle-silhouette-stockcake_0
+      name: castle-hills-1_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 672
-        height: 384
+        width: 1600
+        height: 900
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b961146687eb7c1b0800000000000000
-      internalID: -5636326984309991781
+      spriteID: dd47471db5adb7770800000000000000
+      internalID: 8609715200539784413
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      twilight-castle-silhouette-stockcake_0: -5636326984309991781
+      castle-hills-1_0: 8609715200539784413
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

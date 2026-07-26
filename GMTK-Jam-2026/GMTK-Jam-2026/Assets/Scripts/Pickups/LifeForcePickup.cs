@@ -74,6 +74,12 @@ public class LifeForcePickup : MonoBehaviour
             lifeForceAmount
         );
 
+        if (SoundEffectsManager.Instance != null)
+        {
+            SoundEffectsManager.Instance
+                .PlayPickupSound();
+        }
+
         if (logCollection)
         {
             Debug.Log(

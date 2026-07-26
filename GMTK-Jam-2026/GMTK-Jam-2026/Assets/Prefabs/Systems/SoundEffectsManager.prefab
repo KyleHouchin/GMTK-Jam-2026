@@ -251,6 +251,9 @@ MonoBehaviour:
   dashSound: {fileID: 8300000, guid: decc54668afc8a3449077ad18d15d0d5, type: 3}
   glideSound: {fileID: 8300000, guid: 983c5cbb66679f94fbca5666d344deba, type: 3}
   projectileSound: {fileID: 8300000, guid: a1259810db4995c47b4e98723918b538, type: 3}
+  spikeDamageSound: {fileID: 8300000, guid: cf7c0a0c83680e34aa0ee52ae1f550c2, type: 3}
+  pickupSound: {fileID: 8300000, guid: 097896e9764b5764f963e0ff9799ba62, type: 3}
+  boxDestructionSound: {fileID: 8300000, guid: f92ceb68b4de5904fb0426dfcc8ff402, type: 3}
   victorySound: {fileID: 8300000, guid: d62d26c5194b0bf49a5256e128078e5e, type: 3}
   gameOverSound: {fileID: 8300000, guid: 2ce805dcb907e1545bec29af0f85018b, type: 3}
   oneShotVolume: 1

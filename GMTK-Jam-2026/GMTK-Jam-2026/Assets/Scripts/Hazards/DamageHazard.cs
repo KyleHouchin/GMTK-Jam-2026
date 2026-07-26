@@ -73,13 +73,21 @@ public class DamageHazard : MonoBehaviour
                 damageSourcePosition
             );
 
-        if (damageWasApplied &&
-            logSuccessfulHits)
+        if (damageWasApplied)
         {
-            Debug.Log(
-                $"{name} dealt {lifeForceDamage} Life Force damage to {other.name}.",
-                this
-            );
+            if (SoundEffectsManager.Instance != null)
+            {
+                SoundEffectsManager.Instance
+                    .PlaySpikeDamageSound();
+            }
+
+            if (logSuccessfulHits)
+            {
+                Debug.Log(
+                    $"{name} dealt {lifeForceDamage} Life Force damage to {other.name}.",
+                    this
+                );
+            }
         }
     }
 }

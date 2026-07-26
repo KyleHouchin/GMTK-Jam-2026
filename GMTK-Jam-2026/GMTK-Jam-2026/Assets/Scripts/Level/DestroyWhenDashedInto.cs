@@ -8,6 +8,12 @@ public class DestroyWhenDashedInto : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player") && playerMovement.IsDashing)
         {
+            if (SoundEffectsManager.Instance != null)
+            {
+                SoundEffectsManager.Instance
+                    .PlayBoxDestructionSound();
+            }
+
             Destroy(this.gameObject);
         }
     }

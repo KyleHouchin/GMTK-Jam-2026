@@ -153,8 +153,6 @@ public class CameraBackgroundController : MonoBehaviour
         backgroundRenderer.enabled =
             backgroundSprite != null;
 
-        backgroundRenderer.color =
-            Color.white;
 
         backgroundRenderer.drawMode =
             SpriteDrawMode.Simple;

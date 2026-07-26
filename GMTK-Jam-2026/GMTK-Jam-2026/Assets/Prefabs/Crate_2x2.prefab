@@ -60,6 +60,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Crate_2x2
       objectReference: {fileID: 0}
+    - target: {fileID: 7552865586284227732, guid: 03e2110ec1b3499448c807208e727271, type: 3}
+      propertyPath: m_TagString
+      value: Ground
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
