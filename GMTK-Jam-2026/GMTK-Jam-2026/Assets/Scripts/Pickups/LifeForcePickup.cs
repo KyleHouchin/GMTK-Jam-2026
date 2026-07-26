@@ -1,5 +1,7 @@
 using UnityEngine;
+using System.Collections;
 
+[RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(Collider2D))]
 public class LifeForcePickup : MonoBehaviour
 {
@@ -12,12 +14,15 @@ public class LifeForcePickup : MonoBehaviour
     [Header("Debugging")]
     [SerializeField] private bool logCollection;
 
+    private Animator animator;
+    private Collider2D pickupCollider;
+
     private bool wasCollected;
 
-    private void Reset()
+    private void Awake()
     {
-        Collider2D pickupCollider =
-            GetComponent<Collider2D>();
+        animator = GetComponent<Animator>();
+        pickupCollider = GetComponent<Collider2D>();
 
         if (pickupCollider != null)
         {
@@ -76,6 +81,34 @@ public class LifeForcePickup : MonoBehaviour
                 this
             );
         }
+
+        StartCoroutine(PlayCollectedAnimation());
+    }
+
+    private IEnumerator PlayCollectedAnimation()
+    {
+        // Prevent the pickup from being collected again.
+        pickupCollider.enabled = false;
+
+        // Trigger the transition to the pickup animation.
+        animator.SetTrigger("Collected");
+
+        // Wait until the Animator enters the pickup state.
+        yield return new WaitUntil(() =>
+            animator.GetCurrentAnimatorStateInfo(0)
+                .IsName("bloodbag_picked_up")
+        );
+
+        // Wait until the animation finishes.
+        yield return new WaitUntil(() =>
+        {
+            AnimatorStateInfo stateInfo =
+                animator.GetCurrentAnimatorStateInfo(0);
+
+            return stateInfo.IsName("bloodbag_picked_up") &&
+                   stateInfo.normalizedTime >= 1f &&
+                   !animator.IsInTransition(0);
+        });
 
         Destroy(gameObject);
     }
