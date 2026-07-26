@@ -77,6 +77,7 @@ public class PlayerMovement : MonoBehaviour
 
     private bool isGrounded;
     private bool jumpReleased;
+    public bool IsDashing => isDashing;
     private bool isDashing;
     private bool isGliding;
     private bool wasGlidingLastFrame;
@@ -299,6 +300,10 @@ public class PlayerMovement : MonoBehaviour
             anim.SetFloat("vertical", playerRigidbody.linearVelocity.y);
 
             anim.SetBool("isGliding", isGliding);
+
+            anim.SetBool("isDashing", isDashing);
+
+            anim.SetBool("isWallSliding", isWallSliding);
 
             // Transform from bat back into a vampire.
             // The same transformation animation is played backward.
