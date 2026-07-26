@@ -1924,7 +1924,7 @@ GameObject:
   - component: {fileID: 797443019}
   m_Layer: 6
   m_Name: Crates
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3349,7 +3349,7 @@ GameObject:
   - component: {fileID: 1337588241}
   m_Layer: 6
   m_Name: Spikes
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5768,7 +5768,7 @@ GameObject:
   - component: {fileID: 1537600717}
   m_Layer: 6
   m_Name: OneWay Platforms
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
