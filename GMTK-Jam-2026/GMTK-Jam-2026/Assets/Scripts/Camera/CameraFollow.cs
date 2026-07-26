@@ -9,7 +9,7 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] private Vector2 offset = new Vector2(0f, 1f);
 
     [Header("Smoothing")]
-    [SerializeField] private float smoothTime = 0.15f;
+    [SerializeField, Min(0f)] private float smoothTime = 0.15f;
 
     private Vector3 currentVelocity;
 
@@ -32,5 +32,10 @@ public class CameraFollow : MonoBehaviour
             ref currentVelocity,
             smoothTime
         );
+    }
+
+    public void SetTarget(Transform newTarget)
+    {
+        target = newTarget;
     }
 }

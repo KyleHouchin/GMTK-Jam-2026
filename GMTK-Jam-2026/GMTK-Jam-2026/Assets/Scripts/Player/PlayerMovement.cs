@@ -19,7 +19,8 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Glide Mechanics")]
     [SerializeField] private float glideVelocity = -1.5f;
-    [SerializeField, Min(0.01f)] private float glideGroundStopDistance = 0.5f;
+    [SerializeField, Min(0.01f)] private float glideGroundStopDistance = 1f;
+    private float maxRaycastLength = 50f;
 
     [Header("Jumping")]
     [SerializeField] private float jumpForce = 12f;
@@ -42,9 +43,27 @@ public class PlayerMovement : MonoBehaviour
     [Header("Runtime Speed Modifier")]
     [SerializeField] private float externalSpeedMultiplier = 1f;
 
+    // main
     public float ExternalSpeedMultiplier => externalSpeedMultiplier;
     public bool IsTooCloseToGroundToGlide => isTooCloseToGroundToGlide;
     public float DistanceToGround => distanceToGround;
+
+    // player-wallmechanics
+    [Header("Wall Mechanics")]
+    [SerializeField] private LayerMask wallLayer;
+    [SerializeField] private Transform wallCheck;
+    [SerializeField] private float wallSlidingSpeed = 2f;
+    [SerializeField] private float timeBeforeSlipping = 0.5f;
+    private float timeBeforeSlippingCounter;
+    private bool isWallSliding;
+    public bool IsWallSliding => isWallSliding;
+    private bool isWallJumping;
+    public bool IsWallJumping => isWallJumping;
+    [SerializeField] private Vector2 wallJumpMagnitude = new Vector2(8, 16);
+    private float wallJumpDirection;
+    [SerializeField] private float wallJumpTime = 0.2f;
+    private float wallSlidingBufferCounter;
+    [SerializeField] private float wallSlidingBuffer = 0.12f;
 
     private Rigidbody2D playerRigidbody;
 
@@ -140,6 +159,8 @@ public class PlayerMovement : MonoBehaviour
         UpdateJumpBuffer();
         UpdateDashCooldownCounter();
         UpdateAnimation();
+        IsWalled();
+        TryToWallJump();
     }
 
     private void FixedUpdate()
@@ -147,7 +168,44 @@ public class PlayerMovement : MonoBehaviour
         ApplyHorizontalMovement();
         TryToJump();
         ApplyVariableJumpHeight();
+        WallSlide();
     }
+
+    private void TryToWallJump()
+    {
+        if(Keyboard.current.spaceKey.wasPressedThisFrame)
+        {
+            wallSlidingBufferCounter = 0;
+            Debug.Log("This is the case");
+        }
+        else
+        {
+            wallSlidingBufferCounter += Time.deltaTime;
+        }
+        Debug.Log(isWallSliding + " " + (wallSlidingBufferCounter < wallSlidingBuffer));
+        //You can wall jump if you are currently sliding down a wall (isWallSliding = true)
+        if (isWallSliding && wallSlidingBufferCounter < wallSlidingBuffer)
+        {
+            Debug.Log("This is the case too");
+            wallSlidingBufferCounter = 0;
+            //The jump itself
+            //Flip the character if they are facing the wrong way
+            wallJumpDirection = facingRight ? -1 : 1;
+            FlipFacingDirection();
+            isWallJumping = true;
+            isWallSliding = false;
+            playerRigidbody.linearVelocity = new Vector2(wallJumpDirection * wallJumpMagnitude.x, wallJumpMagnitude.y);
+            StartCoroutine(WallJumpDuration());
+        }
+
+    }
+
+    private IEnumerator WallJumpDuration()
+    {
+        yield return new WaitForSeconds(wallJumpTime);
+        isWallJumping = false;
+
+    } 
 
     private void ReadMovementInput()
     {
@@ -203,19 +261,19 @@ public class PlayerMovement : MonoBehaviour
         }
 
         RaycastHit2D groundHit = Physics2D.Raycast(
-            groundCheck.position,
+            transform.position,
             Vector2.down,
-            glideGroundStopDistance,
+            maxRaycastLength,
             groundLayer
         );
 
         if (groundHit.collider != null)
         {
             distanceToGround = groundHit.distance;
-            isTooCloseToGroundToGlide = true;
+            isTooCloseToGroundToGlide = (distanceToGround < glideGroundStopDistance);
 
             Debug.DrawLine(
-                groundCheck.position,
+                transform.position,
                 groundHit.point,
                 Color.green
             );
@@ -224,17 +282,16 @@ public class PlayerMovement : MonoBehaviour
         {
             distanceToGround = -1f;
             isTooCloseToGroundToGlide = false;
-
-            Debug.DrawLine(
-                groundCheck.position,
-                groundCheck.position + Vector3.down * glideGroundStopDistance,
-                Color.red
-            );
         }
     }
 
     private void UpdateAnimation()
     {
+        if(isWallJumping)
+        {
+            Debug.Log("Wall jump happening, move on");
+            return;
+        }
         if (anim != null)
         {
             anim.SetFloat("horizontal", Mathf.Abs(playerRigidbody.linearVelocity.x));
@@ -302,6 +359,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void ApplyHorizontalMovement()
     {
+        if (isWallJumping)
+        {
+            return;
+        }
         float newHorizontalSpeed;
 
         if (!isDashing)
@@ -439,8 +500,9 @@ public class PlayerMovement : MonoBehaviour
 
     public void SetDash()
     {
-        // cannot start a dash while dashing or while cooling down
-        if (isDashing || dashCooldownCounter < dashCooldown)
+        if (isDashing ||
+            dashCooldownCounter < dashCooldown
+            || isWallJumping)
         {
             return;
         }
@@ -627,7 +689,6 @@ public class PlayerMovement : MonoBehaviour
          */
         while (!isGrounded &&
                !isTooCloseToGroundToGlide &&
-               IsMovingDown() &&
                Keyboard.current != null &&
                Keyboard.current.spaceKey.isPressed)
         {
@@ -733,5 +794,37 @@ public class PlayerMovement : MonoBehaviour
             groundCheck.position,
             groundCheck.position + Vector3.down * glideGroundStopDistance
         );
+    }
+
+    private bool IsWalled()
+    {
+        bool isWalled = Physics2D.OverlapCircle(wallCheck.position, 0.2f, groundLayer);
+        return Physics2D.OverlapCircle(wallCheck.position, 0.2f, groundLayer);
+    }
+
+    private void WallSlide()
+    {
+        if (IsWalled() && !IsGrounded() && IsMovingDown() && ((facingRight && horizontalInput > 0.01f) || (!facingRight && horizontalInput < -0.01f)) && !isGliding)
+        {
+            timeBeforeSlippingCounter += Time.deltaTime;
+            isWallSliding = true;
+            if(isWallJumping)
+            {
+                isWallJumping = false;
+            }
+            if(timeBeforeSlippingCounter < timeBeforeSlipping)
+            {
+                playerRigidbody.linearVelocity = new Vector2(playerRigidbody.linearVelocityX, 0);
+            }
+            else
+            {
+                playerRigidbody.linearVelocity = new Vector2(playerRigidbody.linearVelocityX, Mathf.Clamp(playerRigidbody.linearVelocityY, -wallSlidingSpeed, float.MaxValue));
+            }
+        }
+        else
+        {
+            isWallSliding = false;
+            timeBeforeSlippingCounter = 0;
+        }
     }
 }
