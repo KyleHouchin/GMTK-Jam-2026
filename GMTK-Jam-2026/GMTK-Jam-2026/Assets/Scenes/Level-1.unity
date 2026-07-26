@@ -216,6 +216,7 @@ Transform:
   m_Children:
   - {fileID: 770190744}
   - {fileID: 662605969}
+  - {fileID: 1267527916}
   - {fileID: 1980744448}
   - {fileID: 390871536}
   - {fileID: 227135173}
@@ -269,7 +270,7 @@ MonoBehaviour:
     "Space" while airborne to use!
 
 
-    COST: 3 LIFE FORCE'
+    COST: 10 LIFE FORCE'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1792,7 +1793,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5015338696135595292, guid: 7b77ba10b2423834b96a3be6628982be, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 13.78
+      value: 15.12
       objectReference: {fileID: 0}
     - target: {fileID: 5015338696135595292, guid: 7b77ba10b2423834b96a3be6628982be, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1884,7 +1885,7 @@ MonoBehaviour:
     to use!
 
 
-    COST: 2 LIFE FORCE'
+    COST: 7 LIFE FORCE'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2861,6 +2862,67 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!1001 &682568076
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 11010261}
+    m_Modifications:
+    - target: {fileID: 4617552518846929093, guid: 7b77ba10b2423834b96a3be6628982be, type: 3}
+      propertyPath: lifeForceTimer
+      value: 
+      objectReference: {fileID: 230658154}
+    - target: {fileID: 5015338696135595292, guid: 7b77ba10b2423834b96a3be6628982be, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 173.99
+      objectReference: {fileID: 0}
+    - target: {fileID: 5015338696135595292, guid: 7b77ba10b2423834b96a3be6628982be, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 5.89
+      objectReference: {fileID: 0}
+    - target: {fileID: 5015338696135595292, guid: 7b77ba10b2423834b96a3be6628982be, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5015338696135595292, guid: 7b77ba10b2423834b96a3be6628982be, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5015338696135595292, guid: 7b77ba10b2423834b96a3be6628982be, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5015338696135595292, guid: 7b77ba10b2423834b96a3be6628982be, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5015338696135595292, guid: 7b77ba10b2423834b96a3be6628982be, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5015338696135595292, guid: 7b77ba10b2423834b96a3be6628982be, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5015338696135595292, guid: 7b77ba10b2423834b96a3be6628982be, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5015338696135595292, guid: 7b77ba10b2423834b96a3be6628982be, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6986088753082429303, guid: 7b77ba10b2423834b96a3be6628982be, type: 3}
+      propertyPath: m_Name
+      value: BloodBag (6)
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 7b77ba10b2423834b96a3be6628982be, type: 3}
 --- !u!1 &710712173
 GameObject:
   m_ObjectHideFlags: 0
@@ -2894,7 +2956,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AbilitySelectionButton
   abilityType: 1
-  lifeForceCost: 3
+  lifeForceCost: 10
   abilityId: Glide
   displayName: DRACULA GLIDE
   description: 'Glide through the air and descend more slowly
@@ -4941,6 +5003,11 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!4 &1267527916 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5015338696135595292, guid: 7b77ba10b2423834b96a3be6628982be, type: 3}
+  m_PrefabInstance: {fileID: 682568076}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1320374121
 GameObject:
   m_ObjectHideFlags: 0
@@ -7803,6 +7870,46 @@ Tilemap:
       m_TileObjectToInstantiateIndex: 65535
       dummyAlignment: 0
       m_AllTileFlags: 1073741825
+  - first: {x: 90, y: -8, z: 0}
+    second:
+      serializedVersion: 2
+      m_TileIndex: 0
+      m_TileSpriteIndex: 2
+      m_TileMatrixIndex: 0
+      m_TileColorIndex: 0
+      m_TileObjectToInstantiateIndex: 65535
+      dummyAlignment: 0
+      m_AllTileFlags: 1073741825
+  - first: {x: 91, y: -8, z: 0}
+    second:
+      serializedVersion: 2
+      m_TileIndex: 2
+      m_TileSpriteIndex: 1
+      m_TileMatrixIndex: 0
+      m_TileColorIndex: 0
+      m_TileObjectToInstantiateIndex: 65535
+      dummyAlignment: 0
+      m_AllTileFlags: 1073741825
+  - first: {x: 92, y: -8, z: 0}
+    second:
+      serializedVersion: 2
+      m_TileIndex: 2
+      m_TileSpriteIndex: 1
+      m_TileMatrixIndex: 0
+      m_TileColorIndex: 0
+      m_TileObjectToInstantiateIndex: 65535
+      dummyAlignment: 0
+      m_AllTileFlags: 1073741825
+  - first: {x: 93, y: -8, z: 0}
+    second:
+      serializedVersion: 2
+      m_TileIndex: 1
+      m_TileSpriteIndex: 0
+      m_TileMatrixIndex: 0
+      m_TileColorIndex: 0
+      m_TileObjectToInstantiateIndex: 65535
+      dummyAlignment: 0
+      m_AllTileFlags: 1073741825
   - first: {x: 99, y: -6, z: 0}
     second:
       serializedVersion: 2
@@ -8356,27 +8463,27 @@ Tilemap:
   m_AnimatedTiles: {}
   m_TileAssetArray:
   - serializedVersion: 2
-    m_RefCount: 12
+    m_RefCount: 13
     m_Data: {fileID: 11400000, guid: 528a92e15a92a73498721f89c960af6c, type: 2}
   - serializedVersion: 2
-    m_RefCount: 9
+    m_RefCount: 10
     m_Data: {fileID: 11400000, guid: 9407ee61342d8d946bccac96d74da709, type: 2}
   - serializedVersion: 2
-    m_RefCount: 48
+    m_RefCount: 50
     m_Data: {fileID: 11400000, guid: bb6abbd13ec4e834d89579094714371a, type: 2}
   m_TileSpriteArray:
   - serializedVersion: 2
-    m_RefCount: 9
+    m_RefCount: 10
     m_Data: {fileID: -913791989, guid: ad20e18ad091de84ba367998ce864ea9, type: 3}
   - serializedVersion: 2
-    m_RefCount: 48
+    m_RefCount: 50
     m_Data: {fileID: -4239693929654223803, guid: ad20e18ad091de84ba367998ce864ea9, type: 3}
   - serializedVersion: 2
-    m_RefCount: 12
+    m_RefCount: 13
     m_Data: {fileID: 804008857836529698, guid: ad20e18ad091de84ba367998ce864ea9, type: 3}
   m_TileMatrixArray:
   - serializedVersion: 2
-    m_RefCount: 69
+    m_RefCount: 73
     m_Data:
       e00: 1
       e01: 0
@@ -8396,7 +8503,7 @@ Tilemap:
       e33: 1
   m_TileColorArray:
   - serializedVersion: 2
-    m_RefCount: 69
+    m_RefCount: 73
     m_Data: {r: 1, g: 1, b: 1, a: 1}
   m_TileObjectToInstantiateArray: []
   m_AnimationFrameRate: 1
@@ -8637,6 +8744,18 @@ CompositeCollider2D:
         Y: -55000000
       - X: 1014374976
         Y: -55000000
+    - - X: 940000000
+        Y: -72500000
+      - X: 940000000
+        Y: -70000000
+      - X: 900000000
+        Y: -70000000
+      - X: 900000000
+        Y: -72812496
+      - X: 905312512
+        Y: -75000000
+      - X: 934374976
+        Y: -75000000
     - - X: 2070000000
         Y: -100000000
       - X: 2040000000
@@ -8770,6 +8889,12 @@ CompositeCollider2D:
       - {x: 99, y: -5.000029}
       - {x: 99.00002, y: -5.2812567}
       - {x: 99.53126, y: -5.5}
+    - - {x: 93.43749, y: -7.5}
+      - {x: 94, y: -7.2499824}
+      - {x: 93.99997, y: -7}
+      - {x: 90, y: -7.0000296}
+      - {x: 90.00002, y: -7.281256}
+      - {x: 90.53126, y: -7.5}
     - - {x: 206.99997, y: -10.5}
       - {x: 206.99997, y: -10}
       - {x: 204, y: -10.00003}
@@ -9656,7 +9781,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5923464ee95faa947b7ef292c493c38d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LifeForceAltarManager
-  maximumLifeForce: 100
+  maximumLifeForce: 60
   maximumLifeForceText: {fileID: 235301954}
   remainingLifeForceText: {fileID: 1078919383}
   abilityOptions:
@@ -69773,7 +69898,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AbilitySelectionButton
   abilityType: 0
-  lifeForceCost: 2
+  lifeForceCost: 7
   abilityId: Dash
   displayName: BAT RUSH
   description: 'Dash forward quickly, breaks crates
