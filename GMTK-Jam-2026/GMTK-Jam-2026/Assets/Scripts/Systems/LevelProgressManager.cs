@@ -1,49 +1,28 @@
 public static class LevelProgressManager
 {
     private const int FirstLevelNumber = 1;
-    private const int FinalLevelNumber = 3;
-
-    private static int highestUnlockedLevel =
-        FirstLevelNumber;
 
     public static int GetHighestUnlockedLevel()
     {
-        return highestUnlockedLevel;
+        return FirstLevelNumber;
     }
 
     public static bool IsLevelUnlocked(
         int levelNumber)
     {
-        return levelNumber <=
-               highestUnlockedLevel;
+        return levelNumber ==
+               FirstLevelNumber;
     }
 
     public static void CompleteLevel(
         int completedLevelNumber)
     {
-        int nextLevelNumber =
-            completedLevelNumber + 1;
-
-        if (nextLevelNumber >
-            FinalLevelNumber)
-        {
-            nextLevelNumber =
-                FinalLevelNumber;
-        }
-
-        if (nextLevelNumber <=
-            highestUnlockedLevel)
-        {
-            return;
-        }
-
-        highestUnlockedLevel =
-            nextLevelNumber;
+        // Level progression is currently disabled.
+        // Completing Level 1 does not unlock Level 2.
     }
 
     public static void ResetProgress()
     {
-        highestUnlockedLevel =
-            FirstLevelNumber;
+        // Progress always remains at Level 1.
     }
 }

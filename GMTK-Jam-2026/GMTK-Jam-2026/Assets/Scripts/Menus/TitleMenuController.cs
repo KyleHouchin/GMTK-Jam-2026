@@ -194,21 +194,21 @@ public class TitleMenuController : MonoBehaviour
             levelOneButton,
             levelOneButtonText,
             levelOneUnlocked,
-            "LEVEL 1"
+            "CHAMBER I"
         );
 
         SetLevelButtonState(
             levelTwoButton,
             levelTwoButtonText,
             levelTwoUnlocked,
-            "LEVEL 2"
+            "CHAMBER II"
         );
 
         SetLevelButtonState(
             levelThreeButton,
             levelThreeButtonText,
             levelThreeUnlocked,
-            "LEVEL 3"
+            "CHAMBER III"
         );
     }
 
@@ -234,7 +234,7 @@ public class TitleMenuController : MonoBehaviour
         }
         else
         {
-            buttonText.text = $"{levelName}\n(LOCKED)";
+            buttonText.text = $"{levelName}\n(COMING SOON)";
         }
     }
 

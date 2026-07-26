@@ -123,19 +123,19 @@ public class AbilitySelectionButton : MonoBehaviour
             case AbilityType.BatRush:
                 abilityId = "Dash";
                 displayName = "BAT RUSH";
-                description = "Dash forward quickly";
+                description = "Dash forward quickly, breaks crates\nPress \"Shift\" to use!";
                 break;
 
             case AbilityType.Glide:
                 abilityId = "Glide";
                 displayName = "DRACULA GLIDE";
-                description = "Glide through the air and descend more slowly";
+                description = "Glide through the air and descend more slowly\nHold \"Space\" while airborne to use!";
                 break;
 
             case AbilityType.BloodShot:
                 abilityId = "BloodShot";
                 displayName = "BLOOD SHOT";
-                description = "Launch a cursed projectile at enemies";
+                description = "Launch a cursed projectile at enemies\nUse arrow keys to use! (Omni-directional)";
                 break;
         }
     }
