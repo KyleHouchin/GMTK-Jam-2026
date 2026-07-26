@@ -368,7 +368,7 @@ MonoBehaviour:
   dashFactor: 7
   glideVelocity: -1.5
   glideGroundStopDistance: 1
-  jumpForce: 14
+  jumpForce: 15
   jumpCutMultiplier: 0.4
   coyoteTime: 0.12
   jumpBufferTime: 0.12
